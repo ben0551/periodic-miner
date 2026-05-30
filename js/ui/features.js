@@ -9,7 +9,7 @@ const FeaturesUI = {
   _activeFeature: 'quiz',
   _quizState: {
     streak: 0,
-    mode: 'symbol-to-name', // or 'name-to-symbol' or 'config-to-element'
+    mode: 'symbol-to-name', // or 'name-to-symbol' or 'reaction-guess'
     current: null,
   },
   _builderState: {
@@ -80,12 +80,25 @@ const FeaturesUI = {
       .filter(el => ResourceEngine.state[el.atomicNumber]?.unlocked)
       .map(el => el.atomicNumber);
 
-    if (unlockedNumbers.length === 0) {
+    const firedReactions = REACTIONS.filter(rx => ReactionEngine._fired.has(rx.id));
+
+    if (unlockedNumbers.length === 0 && firedReactions.length === 0) {
       document.getElementById('feature-content').innerHTML =
-        '<p class="text-muted" style="padding:1rem">Unlock elements to take the quiz.</p>';
+        '<p class="text-muted" style="padding:1rem">Unlock elements or trigger reactions to take the quiz.</p>';
       return;
     }
 
+    // Randomly pick between element quiz or reaction quiz
+    const useReactionQuiz = firedReactions.length > 0 && Math.random() > 0.6;
+
+    if (useReactionQuiz) {
+      this._renderQuizReaction(firedReactions);
+    } else {
+      this._renderQuizElement(unlockedNumbers);
+    }
+  },
+
+  _renderQuizElement(unlockedNumbers) {
     // Always pick a new random unlocked element
     this._quizState.current = unlockedNumbers[Math.floor(Math.random() * unlockedNumbers.length)];
 
@@ -114,6 +127,55 @@ const FeaturesUI = {
         <div class="quiz-options">
           ${options.map((opt, idx) => `
             <button class="quiz-btn" data-correct="${opt === correctAnswer}">
+              ${opt}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    content.innerHTML = html;
+
+    content.querySelectorAll('.quiz-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const isCorrect = e.currentTarget.dataset.correct === 'true';
+        if (isCorrect) {
+          this._quizState.streak++;
+          UpgradeEngine.protons += 2;
+          this._renderQuiz();
+        } else {
+          this._quizState.streak = 0;
+          e.currentTarget.style.backgroundColor = 'var(--danger)';
+          setTimeout(() => this._renderQuiz(), 800);
+        }
+      });
+    });
+  },
+
+  _renderQuizReaction(firedReactions) {
+    const rx = firedReactions[Math.floor(Math.random() * firedReactions.length)];
+    this._quizState.current = rx.id;
+
+    // Generate wrong answers: other reaction names
+    const otherReactions = firedReactions.filter(r => r.id !== rx.id);
+    const wrongAnswers = otherReactions
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2)
+      .map(r => r.name);
+
+    const options = [rx.name, ...wrongAnswers]
+      .sort(() => Math.random() - 0.5);
+
+    const content = document.getElementById('feature-content');
+    const html = `
+      <div class="quiz-container">
+        <div class="quiz-question">
+          <div class="quiz-symbol" style="font-family:var(--font-mono);font-size:1.2rem">${rx.formula}</div>
+          <div class="quiz-prompt">Which reaction?</div>
+        </div>
+        <div class="quiz-streak">Streak: ${this._quizState.streak}</div>
+        <div class="quiz-options">
+          ${options.map((opt, idx) => `
+            <button class="quiz-btn" data-correct="${opt === rx.name}">
               ${opt}
             </button>
           `).join('')}
