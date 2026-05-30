@@ -270,6 +270,7 @@ aside h2, section h2 {
 .element-cell .el-name {
   font-size: 0.48em;
   color: #ffffff;
+  text-shadow: 0 0 4px rgba(255,255,255,0.4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -813,6 +814,12 @@ body.light-mode #splash-card {
 ::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── Prestige-ready notification ────────────────────────── */
+@keyframes prestige-pop {
+  from { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+}
 
 /* ── Utility ────────────────────────────────────────────── */
 .hidden { display: none !important; }

@@ -33,6 +33,8 @@
 
 const UI = {
   _activeTab: 'available',
+  _lastNotifiedPrestigePeriod: 0,
+  _chainRenderPending: false,
 
   // ── Formatting helpers ────────────────────────────────
   formatNum(n) {
@@ -92,8 +94,41 @@ const UI = {
       this._updateUpgradeAffordability();
     }
     GameLoop._updatePrestigeButton();
+    this._checkPrestigeReady(); // notify when period is complete
     this._drainDiscoveryQueue();
     this._drainReactionQueue();
+  },
+
+  _checkPrestigeReady() {
+    const period = ResourceEngine.maxUnlockedPeriod;
+    if (period <= this._lastNotifiedPrestigePeriod) return;
+
+    const periodElements = ELEMENTS_SORTED.filter(el => el.period === period);
+    const allUnlocked = periodElements.every(el => ResourceEngine.state[el.atomicNumber]?.unlocked);
+
+    if (allUnlocked) {
+      this._lastNotifiedPrestigePeriod = period;
+      this._showPrestigeReadyNotification(period);
+    }
+  },
+
+  _showPrestigeReadyNotification(period) {
+    const next = period + 1;
+    const bonus = (1.0 + period * 0.5).toFixed(1);
+    const msg = `Period ${period} Complete! Nobel Prize Reset available → ×${bonus} production + unlock Period ${next}`;
+
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+      position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+      background: var(--success); color: var(--bg-deep); padding: 0.75rem 1.5rem;
+      border-radius: 6px; font-size: 0.75rem; z-index: 300;
+      box-shadow: 0 0 20px rgba(68,255,136,0.4);
+      animation: prestige-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    `;
+    notif.textContent = msg;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 6000);
   },
 
   _drainDiscoveryQueue() {
@@ -109,6 +144,15 @@ const UI = {
   },
 
   // ── Chain Panel ───────────────────────────────────────
+  _queueChainRender() {
+    if (this._chainRenderPending) return;
+    this._chainRenderPending = true;
+    requestAnimationFrame(() => {
+      this._renderChain();
+      this._chainRenderPending = false;
+    });
+  },
+
   _renderChain() {
     const list = document.getElementById('chain-list');
     list.innerHTML = '';
@@ -149,7 +193,7 @@ const UI = {
     list.querySelectorAll('.btn-buy-drill').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const n = parseInt(e.currentTarget.dataset.atomic, 10);
-        if (ResourceEngine.buyDrill(n)) this._renderChain();
+        if (ResourceEngine.buyDrill(n)) this._queueChainRender();
       });
     });
   },
@@ -203,9 +247,22 @@ const UI = {
     const list = document.getElementById('upgrade-list');
     list.innerHTML = '';
 
-    const upgs = this._activeTab === 'available'
+    let upgs = this._activeTab === 'available'
       ? UpgradeEngine.available()
       : UpgradeEngine.UPGRADES.filter(u => UpgradeEngine.isPurchased(u.id));
+
+    // Sort available upgrades: affordable first, then by progress toward affordability
+    if (this._activeTab === 'available') {
+      upgs.sort((a, b) => {
+        const aAffordable = UpgradeEngine.canAfford(a.id);
+        const bAffordable = UpgradeEngine.canAfford(b.id);
+        if (aAffordable !== bAffordable) return bAffordable ? 1 : -1;
+        // Both affordable or both unaffordable: sort by progress (closest to affordable first)
+        const aProgress = this._calcUpgradeProgress(a);
+        const bProgress = this._calcUpgradeProgress(b);
+        return bProgress - aProgress;
+      });
+    }
 
     if (upgs.length === 0) {
       list.innerHTML = `<p class="text-muted" style="font-size:0.7rem;padding:0.5rem">

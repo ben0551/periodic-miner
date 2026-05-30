@@ -152,18 +152,17 @@ const GameLoop = {
 
   // ── Save / Load ───────────────────────────────────────
   save() {
-    const payload = {
-      version:    2,
-      savedAt:    Date.now(),
-      resources:  ResourceEngine.serialize(),
-      upgrades:   UpgradeEngine.serialize(),
-      reactions:  ReactionEngine.serialize(),
-    };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
-    // Brief visual feedback
-    const btn = document.getElementById('btn-save');
-    btn.textContent = 'Saved!';
-    setTimeout(() => btn.textContent = 'Save', 1000);
+    // Defer save to avoid blocking game loop
+    setTimeout(() => {
+      const payload = {
+        version:    2,
+        savedAt:    Date.now(),
+        resources:  ResourceEngine.serialize(),
+        upgrades:   UpgradeEngine.serialize(),
+        reactions:  ReactionEngine.serialize(),
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+    }, 0);
   },
 
   _loadRaw() {

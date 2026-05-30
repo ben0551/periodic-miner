@@ -179,9 +179,14 @@ const ResourceEngine = {
     ELEMENTS_SORTED.forEach(el => {
       if (el.period === period) {
         const s = this.state[el.atomicNumber];
-        s.amount   = 0;
-        s.drills   = el.atomicNumber === 1 ? 1 : 0;
-        s.unlocked = el.atomicNumber === 1 && period === 1;
+        s.amount = 0;
+        if (el.atomicNumber === 1) {
+          s.drills = 1;
+          s.unlocked = true;
+        } else {
+          s.drills = 0;
+          s.unlocked = false;
+        }
       }
     });
     this.maxUnlockedPeriod = period + 1;
