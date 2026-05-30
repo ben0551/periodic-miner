@@ -268,8 +268,9 @@ aside h2, section h2 {
 }
 
 .element-cell .el-name {
-  font-size: 0.45em;
-  color: var(--muted);
+  font-size: 0.48em;
+  color: var(--text);
+  opacity: 0.75;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
