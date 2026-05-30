@@ -153,6 +153,15 @@ const UpgradeEngine = {
       effect: { type: 'multiply', target: 17, factor: 3 },
       requires: [],
     },
+    {
+      id: 'electrochemical-catalyst',
+      name: 'Electrochemical Catalyst',
+      desc: 'Halogen breakthrough — all element production ×2.',
+      cost: 150,
+      elementCost: [{ atomicNumber: 17, amount: 500 }, { atomicNumber: 11, amount: 400 }],
+      effect: { type: 'multiply', target: 'all', factor: 2 },
+      requires: [],
+    },
 
     // ── Period 4 ──────────────────────────────────────────
     {
