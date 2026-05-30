@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Periodic Table UI Renderer
+// PERIODIC MINER — Periodic Table UI Renderer
 // ============================================================
 // DESIGN:
 //   Renders the periodic table as a CSS grid (18 cols × 9 rows).

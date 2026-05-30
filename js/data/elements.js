@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Element Data
+// PERIODIC MINER — Element Data
 // ============================================================
 // Each element is a node in the mining chain.
 //

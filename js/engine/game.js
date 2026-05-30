@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Core Game Loop
+// PERIODIC MINER — Core Game Loop
 // ============================================================
 // DESIGN:
 //   GameLoop drives the idle tick using requestAnimationFrame.

@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Element Properties
+// PERIODIC MINER — Element Properties
 // ============================================================
 // All 118 elements with scientific data for features:
 // - shells: electron configuration [per shell]

@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Resource Engine
+// PERIODIC MINER — Resource Engine
 // ============================================================
 // DESIGN:
 //   Each element N has:

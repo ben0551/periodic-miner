@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Feature Panel UI
+// PERIODIC MINER — Feature Panel UI
 // ============================================================
 // Four tabs: Quiz | Shells | Trends | Timeline
 // Renders below the periodic table element info strip.

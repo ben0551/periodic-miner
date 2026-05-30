@@ -1,5 +1,5 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — General UI Manager
+// PERIODIC MINER — General UI Manager
 // ============================================================
 // DESIGN:
 //   UI.render()  — full rebuild (on init / prestige)
