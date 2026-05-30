@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Period Miner</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ============================================================
+       PERIOD MINER — Main Layout
+       Three-panel layout:
+         LEFT   — resource chain panel (active element stats + buy drills)
+         CENTER — periodic table board (the main game map)
+         RIGHT  — upgrades / research panel
+  ============================================================ -->
+
+  <header id="game-header">
+    <h1>Period Miner</h1>
+    <div id="header-stats">
+      <span id="stat-protons">Protons: 0</span>
+      <span id="stat-rank">Period: 1</span>
+      <span id="stat-total-elements">Elements Unlocked: 1</span>
+    </div>
+    <div id="header-actions">
+      <button id="btn-prestige" class="btn-prestige" disabled>Nobel Prize Reset</button>
+      <button id="btn-save">Save</button>
+    </div>
+  </header>
+
+  <main id="game-layout">
+
+    <!-- LEFT: Active resource chain for the selected element group -->
+    <aside id="panel-chain">
+      <h2>Mining Chain</h2>
+      <div id="chain-list">
+        <!-- Populated by ui/ui.js: one row per unlocked element -->
+      </div>
+    </aside>
+
+    <!-- CENTER: The periodic table as game board -->
+    <section id="panel-table">
+      <h2>The Table</h2>
+      <div id="periodic-table">
+        <!-- Populated by ui/table.js -->
+      </div>
+    </section>
+
+    <!-- RIGHT: Upgrades / research -->
+    <aside id="panel-upgrades">
+      <h2>Research</h2>
+      <div id="upgrade-tabs">
+        <button class="tab-btn active" data-tab="available">Available</button>
+        <button class="tab-btn" data-tab="purchased">Purchased</button>
+      </div>
+      <div id="upgrade-list">
+        <!-- Populated by ui/ui.js -->
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Element detail modal (click on locked table cell) -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal-element">
+      <button id="modal-close">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Discovery toasts (bottom-right) -->
+  <div id="toast-container"></div>
+
+  <!-- Load order: data → engine → ui → main -->
+  <script src="js/data/elements.js"></script>
+  <script src="js/data/element-facts.js"></script>
+  <script src="js/engine/resources.js"></script>
+  <script src="js/engine/upgrades.js"></script>
+  <script src="js/engine/game.js"></script>
+  <script src="js/ui/table.js"></script>
+  <script src="js/ui/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
