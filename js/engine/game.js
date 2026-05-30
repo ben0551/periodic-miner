@@ -204,8 +204,8 @@ const GameLoop = {
     const canAfford = UpgradeEngine.protons >= cost;
     btnProton.disabled = !canAfford;
     btnProton.textContent = canAfford
-      ? `⚡ Prestige P${next}`
-      : `⚡ Need ${(cost - UpgradeEngine.protons).toLocaleString()} more Protons`;
+      ? `⚡ Prestige`
+      : `⚡ Need more`;
   },
 
   // ── Save / Load ───────────────────────────────────────
