@@ -153,7 +153,8 @@ aside h2, section h2 {
 #periodic-table {
   display: grid;
   grid-template-columns: repeat(18, 1fr);
-  gap: 2px;
+  column-gap: 2px;
+  row-gap: 1px;
   width: 100%;
   flex: 1 1 0;
   overflow-y: auto;
