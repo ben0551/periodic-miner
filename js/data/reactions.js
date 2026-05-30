@@ -166,6 +166,53 @@ const REACTIONS = [
     permaBoost:   { type: 'period', period: 5, factor: 1.3 },
   },
 
+  // ── More Period 3-4 reactions for faster progression ────
+  {
+    id:           'aluminum-oxide',
+    formula:      'Al₂O₃',
+    name:         'Aluminum Oxide (Corundum)',
+    flavour:      'One of the hardest naturally occurring compounds. Rubies and sapphires are just corundum with trace impurities.',
+    reagents:     [{ atomicNumber: 13, amount: 800 }, { atomicNumber: 8, amount: 900 }],
+    protonReward: 420,
+    permaBoost:   null,
+  },
+  {
+    id:           'zinc-oxide',
+    formula:      'ZnO',
+    name:         'Zinc Oxide',
+    flavour:      'White powder used in rubber manufacturing and cosmetics. Creates a protective oxide layer that keeps zinc from rusting further.',
+    reagents:     [{ atomicNumber: 30, amount: 1200 }, { atomicNumber: 8, amount: 600 }],
+    protonReward: 380,
+    permaBoost:   null,
+  },
+  {
+    id:           'potassium-hydroxide',
+    formula:      'KOH',
+    name:         'Potassium Hydroxide',
+    flavour:      'A strong alkali used to make soap. Reacts so vigorously with water it generates heat — handle with care.',
+    reagents:     [{ atomicNumber: 19, amount: 600 }, { atomicNumber: 8, amount: 400 }, { atomicNumber: 1, amount: 800 }],
+    protonReward: 380,
+    permaBoost:   null,
+  },
+  {
+    id:           'ferric-chloride',
+    formula:      'FeCl₃',
+    name:         'Iron(III) Chloride',
+    flavour:      'A dark brown compound used for etching copper in electronics manufacturing. Medieval alchemists called it "ferrum muriaticum".',
+    reagents:     [{ atomicNumber: 26, amount: 900 }, { atomicNumber: 17, amount: 1350 }],
+    protonReward: 440,
+    permaBoost:   null,
+  },
+  {
+    id:           'phosphorus-pentoxide',
+    formula:      'P₂O₅',
+    name:         'Phosphorus Pentoxide',
+    flavour:      'A powerful desiccant that absorbs water so aggressively it\'s dangerous around moisture. White, deliquescent crystals.',
+    reagents:     [{ atomicNumber: 15, amount: 600 }, { atomicNumber: 8, amount: 1200 }],
+    protonReward: 360,
+    permaBoost:   null,
+  },
+
   // ── Electronegativity Reactions (auto-fire) ─────────────
   // High electronegativity nonmetals + low electronegativity metals
   {
