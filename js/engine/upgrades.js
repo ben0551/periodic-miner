@@ -16,6 +16,7 @@ const UpgradeEngine = {
   protons:            0,
   prestigeMultiplier: 1.0,
   _purchased:         new Set(),
+  _temporaryBoost:    { factor: 1, expiresAt: 0 },
 
   UPGRADES: [
     // ── Period 1 ──────────────────────────────────────────
@@ -192,6 +193,24 @@ const UpgradeEngine = {
       requires: ['argon-shield'],
     },
 
+    // ── Mid-game Proton Sinks (Period 3) ──────────────────
+    {
+      id: 'synthesis-catalyst',
+      name: 'Element Synthesis',
+      desc: 'Instantly unlock one locked element.',
+      cost: 50000,
+      effect: { type: 'element-unlock' },
+      requires: [],
+    },
+    {
+      id: 'production-overdrive',
+      name: 'Production Overdrive',
+      desc: 'All elements ×10 for 60 seconds.',
+      cost: 100000,
+      effect: { type: 'temporary-boost', factor: 10, duration: 60 },
+      requires: [],
+    },
+
     // ── Late game ─────────────────────────────────────────
     {
       id: 'offline-1',
@@ -261,6 +280,10 @@ const UpgradeEngine = {
     }
     // Reaction permanent boosts stack on top
     m *= ReactionEngine.productionMultiplier(atomicNumber);
+    // Temporary boosts (from Production Overdrive, etc.)
+    if (Date.now() < this._temporaryBoost.expiresAt) {
+      m *= this._temporaryBoost.factor;
+    }
     return m;
   },
 
@@ -309,7 +332,32 @@ const UpgradeEngine = {
         ResourceEngine.state[ec.atomicNumber].amount -= ec.amount;
       }
     }
-    this._purchased.add(upgradeId);
+
+    // Handle special effects
+    if (upg.effect.type === 'temporary-boost') {
+      this._temporaryBoost = {
+        factor: upg.effect.factor,
+        expiresAt: Date.now() + (upg.effect.duration * 1000),
+      };
+      UI.showToast(`⚡ Production ×${upg.effect.factor} for ${upg.effect.duration}s!`);
+    } else if (upg.effect.type === 'element-unlock') {
+      // Unlock the first locked element in current period
+      for (const el of ELEMENTS_SORTED) {
+        if (el.period <= ResourceEngine.maxUnlockedPeriod) {
+          const s = ResourceEngine.state[el.atomicNumber];
+          if (!s.unlocked) {
+            s.unlocked = true;
+            UI.showToast(`✨ Unlocked ${el.name}!`);
+            break;
+          }
+        }
+      }
+    }
+
+    // Only mark as purchased if it's not a consumable (element-unlock can be used multiple times)
+    if (upg.effect.type !== 'element-unlock') {
+      this._purchased.add(upgradeId);
+    }
     return true;
   },
 
