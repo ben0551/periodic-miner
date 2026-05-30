@@ -353,6 +353,14 @@ aside h2, section h2 {
   transform: rotate(180deg);
 }
 
+/* On large screens (> 900px height), show panel by default */
+@media (min-height: 901px) {
+  #panel-features.features-hidden {
+    height: 200px;
+    border-top: 1px solid var(--border);
+  }
+}
+
 /* On small screens, hide panel by default */
 @media (max-height: 900px) {
   #panel-features {
