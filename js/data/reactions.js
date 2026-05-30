@@ -51,6 +51,42 @@ const REACTIONS = [
     protonReward: 250,
     permaBoost:   { type: 'period', period: 2, factor: 1.2 },
   },
+  {
+    id:           'hydrogen-chloride',
+    formula:      'HCl',
+    name:         'Hydrogen Chloride (gas)',
+    flavour:      'A colorless, pungent gas. Dissolves in water to form hydrochloric acid, one of the strongest common acids.',
+    reagents:     [{ atomicNumber: 1, amount: 400 }, { atomicNumber: 9, amount: 300 }],
+    protonReward: 180,
+    permaBoost:   null,
+  },
+  {
+    id:           'phosphine',
+    formula:      'PH₃',
+    name:         'Phosphine',
+    flavour:      'Smells like rotting fish. Found in decaying organic matter, and mysteriously detected in Venus\'s atmosphere.',
+    reagents:     [{ atomicNumber: 15, amount: 200 }, { atomicNumber: 1, amount: 600 }],
+    protonReward: 190,
+    permaBoost:   null,
+  },
+  {
+    id:           'hydrogen-sulfide',
+    formula:      'H₂S',
+    name:         'Hydrogen Sulfide',
+    flavour:      'Smells like rotten eggs. Toxic in high concentrations, but found naturally in volcanoes and geothermal vents.',
+    reagents:     [{ atomicNumber: 1, amount: 500 }, { atomicNumber: 16, amount: 250 }],
+    protonReward: 200,
+    permaBoost:   null,
+  },
+  {
+    id:           'silicon-dioxide',
+    formula:      'SiO₂',
+    name:         'Silicon Dioxide (Silica)',
+    flavour:      'Sand, quartz, glass — one of the most abundant compounds on Earth. The basis of the glass age.',
+    reagents:     [{ atomicNumber: 14, amount: 400 }, { atomicNumber: 8, amount: 400 }],
+    protonReward: 280,
+    permaBoost:   null,
+  },
 
   // ── Period 3 ──────────────────────────────────────────
   {
