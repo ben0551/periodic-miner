@@ -258,12 +258,15 @@ const UI = {
     list.innerHTML = '';
 
     let upgs = this._activeTab === 'available'
-      ? UpgradeEngine.available()
+      ? UpgradeEngine.UPGRADES
       : UpgradeEngine.UPGRADES.filter(u => UpgradeEngine.isPurchased(u.id));
 
-    // Sort available upgrades: affordable first, then by progress toward affordability
+    // For Available tab: separate available from purchased, then sort available by affordability
     if (this._activeTab === 'available') {
-      upgs.sort((a, b) => {
+      const available = upgs.filter(u => !UpgradeEngine.isPurchased(u.id));
+      const purchased = upgs.filter(u => UpgradeEngine.isPurchased(u.id));
+
+      available.sort((a, b) => {
         const aAffordable = UpgradeEngine.canAfford(a.id);
         const bAffordable = UpgradeEngine.canAfford(b.id);
         if (aAffordable !== bAffordable) return bAffordable ? 1 : -1;
@@ -272,6 +275,8 @@ const UI = {
         const bProgress = this._calcUpgradeProgress(b);
         return bProgress - aProgress;
       });
+
+      upgs = [...available, ...purchased];
     }
 
     if (upgs.length === 0) {
@@ -337,23 +342,29 @@ const UI = {
   _renderReactions() {
     const list = document.getElementById('upgrade-list');
     list.innerHTML = '';
-    REACTIONS.forEach(rx => {
-      const fired   = ReactionEngine._fired.has(rx.id);
-      const canFire = !fired && ReactionEngine._canFire(rx);
+
+    // Separate unfired from fired reactions
+    const unfired = REACTIONS.filter(rx => !ReactionEngine._fired.has(rx.id));
+    const fired = REACTIONS.filter(rx => ReactionEngine._fired.has(rx.id));
+
+    // Render unfired first, then fired
+    [...unfired, ...fired].forEach(rx => {
+      const isFired   = ReactionEngine._fired.has(rx.id);
+      const canFire = !isFired && ReactionEngine._canFire(rx);
       const card    = document.createElement('div');
-      card.className = `reaction-card${fired ? ' rx-done' : ''}${canFire ? ' rx-ready' : ''}`;
+      card.className = `reaction-card${isFired ? ' rx-done' : ''}${canFire ? ' rx-ready' : ''}`;
       card.dataset.rxId = rx.id;
 
       const rows = rx.reagents.map(r => {
         const el   = ELEMENT_BY_NUMBER[r.atomicNumber];
         const have = Math.min(ResourceEngine.state[r.atomicNumber]?.amount ?? 0, r.amount);
-        const pct  = fired ? 100 : Math.min(100, (have / r.amount) * 100);
-        const met  = fired || have >= r.amount;
+        const pct  = isFired ? 100 : Math.min(100, (have / r.amount) * 100);
+        const met  = isFired || have >= r.amount;
         return `
           <div class="rx-reagent-row">
             <span class="rx-reagent-symbol ${met ? 'met' : ''}">${el.symbol}</span>
             <div class="rx-reagent-bar"><div class="rx-reagent-fill" style="width:${pct}%"></div></div>
-            <span class="rx-reagent-count ${met ? 'met' : ''}">${fired ? '✓' : `${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}`}</span>
+            <span class="rx-reagent-count ${met ? 'met' : ''}">${isFired ? '✓' : `${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}`}</span>
           </div>`;
       }).join('');
 
@@ -366,7 +377,7 @@ const UI = {
         </div>
         <div class="rx-flavour">${rx.flavour}</div>
         <div class="rx-reagents">${rows}</div>
-        ${fired ? '<div class="rx-status">✓ Reacted</div>' : ''}
+        ${isFired ? '<div class="rx-status">✓ Reacted</div>' : ''}
       `;
       card.addEventListener('click', () => this._showReactionModal(rx));
       list.appendChild(card);
