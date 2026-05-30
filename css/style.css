@@ -335,7 +335,7 @@ aside h2, section h2 {
 }
 
 #toggle-features {
-  display: none;
+  display: block;
   background: none;
   border: none;
   color: var(--muted);
