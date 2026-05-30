@@ -1,49 +1,38 @@
 // ============================================================
-// PERIODIC(TABLE) MINER — Upgrade / Research Engine
+// PERIOD MINER — Upgrade / Research Engine
 // ============================================================
-// DESIGN:
-//   Upgrades are bought with Protons (the noble-gas currency).
-//   Each upgrade has:
-//     id         — unique string
-//     name       — display name
-//     desc       — flavour description
-//     cost       — Proton cost
-//     effect     — what the upgrade does (type + params)
-//     requires   — array of upgrade IDs that must be purchased first
-//     purchased  — runtime flag
+// Effect types:
+//   multiply      — { target: atomicNumber|'all'|'period:N'|'category:X', factor }
+//   noble-boost   — { target: atomicNumber|'all', factor } — scales Proton generation
+//   drill-discount — { factor } — multiplies all drill costs
+//   offline-hours — { bonus } — adds hours to offline cap
+//   prestige-bonus — { factor } — adds to permanent prestigeMultiplier
 //
-//   Effect types:
-//     { type: 'multiply', target: atomicNumber|'all'|'period:N', factor: X }
-//       → multiplies production rate of target elements by X
-//     { type: 'drill-discount', target, factor: X }
-//       → multiplies drill purchase cost by X (e.g., 0.8 = 20% off)
-//     { type: 'unlock-cost', target, factor: X }
-//       → reduces the unlock cost threshold for an element
-//     { type: 'prestige-bonus', factor: X }
-//       → adds to the permanent prestige multiplier
-//
-//   Prestige bonuses:
-//     Each Nobel Prize reset accumulates a permanent multiplier stored
-//     in prestigeMultiplier. This is NOT reset on prestige.
-//
-//   TODO: Add more upgrade definitions — this is a starter set.
-//   TODO: Implement tech tree visual in the UI panel.
+// elementCost (optional) — array of { atomicNumber, amount }
+//   deducted from element stockpiles on purchase.
 // ============================================================
 
 const UpgradeEngine = {
-  protons:           0,
-  prestigeMultiplier: 1.0,  // permanent, survives resets
-  _purchased:        new Set(),
+  protons:            0,
+  prestigeMultiplier: 1.0,
+  _purchased:         new Set(),
 
-  // ── Upgrade definitions ───────────────────────────────
-  // Expand this array to add more upgrades.
   UPGRADES: [
+    // ── Period 1 ──────────────────────────────────────────
     {
       id: 'h-drill-1',
       name: 'Pneumatic Drill',
       desc: 'Hydrogen mining +50%.',
       cost: 10,
       effect: { type: 'multiply', target: 1, factor: 1.5 },
+      requires: [],
+    },
+    {
+      id: 'he-tap',
+      name: 'Noble Gas Tap',
+      desc: 'Helium Proton generation ×2.',
+      cost: 15,
+      effect: { type: 'noble-boost', target: 2, factor: 2 },
       requires: [],
     },
     {
@@ -55,6 +44,14 @@ const UpgradeEngine = {
       requires: ['h-drill-1'],
     },
     {
+      id: 'drill-discount-1',
+      name: 'Bulk Order',
+      desc: 'All drill costs -20%.',
+      cost: 100,
+      effect: { type: 'drill-discount', factor: 0.8 },
+      requires: [],
+    },
+    {
       id: 'period1-boost',
       name: 'Fusion Catalyst',
       desc: 'All Period 1 elements ×3.',
@@ -62,33 +59,138 @@ const UpgradeEngine = {
       effect: { type: 'multiply', target: 'period:1', factor: 3 },
       requires: ['h-drill-2'],
     },
+
+    // ── Period 2 (element costs unlock naturally) ─────────
     {
-      id: 'drill-discount-1',
-      name: 'Bulk Order',
-      desc: 'Drill costs -20% across the board.',
-      cost: 100,
-      effect: { type: 'drill-discount', target: 'all', factor: 0.8 },
+      id: 'water-synthesis',
+      name: 'Water Synthesis',
+      desc: 'H₂O compound boosts hydrogen output ×3.',
+      cost: 50,
+      elementCost: [{ atomicNumber: 1, amount: 500 }, { atomicNumber: 8, amount: 250 }],
+      effect: { type: 'multiply', target: 1, factor: 3 },
       requires: [],
     },
     {
+      id: 'nitrogen-coolant',
+      name: 'Liquid N₂ Coolant',
+      desc: 'Cool the drills — Period 2 production ×2.',
+      cost: 100,
+      elementCost: [{ atomicNumber: 7, amount: 800 }, { atomicNumber: 8, amount: 400 }],
+      effect: { type: 'multiply', target: 'period:2', factor: 2 },
+      requires: [],
+    },
+    {
+      id: 'carbon-tools',
+      name: 'Carbon Drill Tips',
+      desc: 'Carbon-reinforced drills — all mining ×1.5.',
+      cost: 75,
+      elementCost: [{ atomicNumber: 6, amount: 1000 }],
+      effect: { type: 'multiply', target: 'all', factor: 1.5 },
+      requires: [],
+    },
+    {
+      id: 'ne-array',
+      name: 'Neon Array',
+      desc: 'Neon discharge amplifier — Ne Proton rate ×3.',
+      cost: 75,
+      elementCost: [{ atomicNumber: 10, amount: 100 }],
+      effect: { type: 'noble-boost', target: 10, factor: 3 },
+      requires: ['he-tap'],
+    },
+
+    // ── Period 3 ──────────────────────────────────────────
+    {
+      id: 'salt-crystal',
+      name: 'Salt Crystal Matrix',
+      desc: 'NaCl lattice resonance — Period 3 production ×2.',
+      cost: 100,
+      elementCost: [{ atomicNumber: 11, amount: 500 }, { atomicNumber: 17, amount: 500 }],
+      effect: { type: 'multiply', target: 'period:3', factor: 2 },
+      requires: [],
+    },
+    {
+      id: 'silicon-chip',
+      name: 'Silicon Processor',
+      desc: 'AI mining upgrade — all noble gas Proton yield ×2.',
+      cost: 150,
+      elementCost: [{ atomicNumber: 14, amount: 2000 }, { atomicNumber: 8, amount: 500 }],
+      effect: { type: 'noble-boost', target: 'all', factor: 2 },
+      requires: ['ne-array'],
+    },
+    {
+      id: 'argon-shield',
+      name: 'Argon Shielding',
+      desc: 'Protect drill mechanisms — drill costs -15% additional.',
+      cost: 120,
+      elementCost: [{ atomicNumber: 18, amount: 200 }],
+      effect: { type: 'drill-discount', factor: 0.85 },
+      requires: ['drill-discount-1'],
+    },
+
+    // ── Period 4 ──────────────────────────────────────────
+    {
+      id: 'iron-alloy',
+      name: 'Iron-Carbon Alloy',
+      desc: 'Steel drill housings — transition metal production ×2.5.',
+      cost: 200,
+      elementCost: [{ atomicNumber: 26, amount: 5000 }, { atomicNumber: 6, amount: 2000 }],
+      effect: { type: 'multiply', target: 'category:transition-metal', factor: 2.5 },
+      requires: [],
+    },
+    {
+      id: 'titanium-frame',
+      name: 'Titanium Frame',
+      desc: 'Lightweight drill assembly — Period 4 production ×2.',
+      cost: 150,
+      elementCost: [{ atomicNumber: 22, amount: 2000 }],
+      effect: { type: 'multiply', target: 'period:4', factor: 2 },
+      requires: [],
+    },
+    {
+      id: 'copper-wiring',
+      name: 'Copper Wiring',
+      desc: 'High-conductivity motors — drill costs -25% additional.',
+      cost: 100,
+      elementCost: [{ atomicNumber: 29, amount: 1000 }],
+      effect: { type: 'drill-discount', factor: 0.75 },
+      requires: ['argon-shield'],
+    },
+
+    // ── Late game ─────────────────────────────────────────
+    {
       id: 'offline-1',
       name: 'Autonomous Mining Protocol',
-      desc: 'Offline time cap +4 hours.',
+      desc: 'Offline production cap +4 hours.',
       cost: 500,
-      // TODO: hook into MAX_OFFLINE_SECONDS in resources.js
       effect: { type: 'offline-hours', bonus: 4 },
       requires: [],
     },
     {
+      id: 'co2-scrubbing',
+      name: 'CO₂ Carbon Capture',
+      desc: 'Extended autonomous mining — offline cap +8 hours.',
+      cost: 200,
+      elementCost: [{ atomicNumber: 6, amount: 1000 }, { atomicNumber: 8, amount: 2000 }],
+      effect: { type: 'offline-hours', bonus: 8 },
+      requires: ['offline-1'],
+    },
+    {
       id: 'prestige-1',
       name: 'Nobel Legacy',
-      desc: 'Each prestige reset grants +10% permanent production.',
+      desc: 'Each Nobel Prize reset grants +10% permanent production.',
       cost: 1000,
       effect: { type: 'prestige-bonus', factor: 0.10 },
       requires: ['period1-boost'],
     },
-    // TODO: add upgrades for periods 2-7, transition metal boosts,
-    //       lanthanide/actinide special mechanics, etc.
+    {
+      id: 'quantum-tunneling',
+      name: 'Quantum Tunneling',
+      desc: 'Subatomic shortcuts — all production ×2.',
+      cost: 5000,
+      elementCost: [{ atomicNumber: 1, amount: 100000 }, { atomicNumber: 26, amount: 50000 }],
+      effect: { type: 'multiply', target: 'all', factor: 2 },
+      requires: ['prestige-1'],
+    },
   ],
 
   init() {
@@ -96,7 +198,7 @@ const UpgradeEngine = {
     this.protons = 0;
   },
 
-  // ── Multiplier query (called by ResourceEngine.tick) ──
+  // ── Multiplier queries ────────────────────────────────
   productionMultiplier(atomicNumber) {
     const el = ELEMENT_BY_NUMBER[atomicNumber];
     let m = this.prestigeMultiplier;
@@ -111,14 +213,25 @@ const UpgradeEngine = {
       } else if (fx.target === atomicNumber) {
         m *= fx.factor;
       } else if (typeof fx.target === 'string' && fx.target.startsWith('period:')) {
-        const p = parseInt(fx.target.split(':')[1], 10);
-        if (el.period === p) m *= fx.factor;
+        if (el.period === parseInt(fx.target.split(':')[1], 10)) m *= fx.factor;
+      } else if (typeof fx.target === 'string' && fx.target.startsWith('category:')) {
+        if (el.category === fx.target.split(':')[1]) m *= fx.factor;
       }
     }
     return m;
   },
 
-  // Drill cost multiplier (from drill-discount upgrades)
+  nobleGasProtonMultiplier(atomicNumber) {
+    let m = 1;
+    for (const upg of this.UPGRADES) {
+      if (!this._purchased.has(upg.id)) continue;
+      const fx = upg.effect;
+      if (fx.type !== 'noble-boost') continue;
+      if (fx.target === 'all' || fx.target === atomicNumber) m *= fx.factor;
+    }
+    return m;
+  },
+
   drillCostMultiplier() {
     let m = 1;
     for (const upg of this.UPGRADES) {
@@ -134,22 +247,31 @@ const UpgradeEngine = {
     if (!upg) return false;
     if (this._purchased.has(upgradeId)) return false;
     if (!upg.requires.every(r => this._purchased.has(r))) return false;
-    return this.protons >= upg.cost;
+    if (this.protons < upg.cost) return false;
+    if (upg.elementCost) {
+      for (const ec of upg.elementCost) {
+        const s = ResourceEngine.state[ec.atomicNumber];
+        if (!s || s.amount < ec.amount) return false;
+      }
+    }
+    return true;
   },
 
   purchase(upgradeId) {
     if (!this.canAfford(upgradeId)) return false;
     const upg = this.UPGRADES.find(u => u.id === upgradeId);
     this.protons -= upg.cost;
+    if (upg.elementCost) {
+      for (const ec of upg.elementCost) {
+        ResourceEngine.state[ec.atomicNumber].amount -= ec.amount;
+      }
+    }
     this._purchased.add(upgradeId);
     return true;
   },
 
-  isPurchased(upgradeId) {
-    return this._purchased.has(upgradeId);
-  },
+  isPurchased(upgradeId) { return this._purchased.has(upgradeId); },
 
-  // Available = requires met + not yet purchased
   available() {
     return this.UPGRADES.filter(u =>
       !this._purchased.has(u.id) &&
@@ -157,17 +279,14 @@ const UpgradeEngine = {
     );
   },
 
-  // ── Prestige hook ─────────────────────────────────────
   onPrestige(period) {
-    const bonusUpgrades = this.UPGRADES.filter(
-      u => this._purchased.has(u.id) && u.effect.type === 'prestige-bonus'
-    );
-    for (const upg of bonusUpgrades) {
-      this.prestigeMultiplier += upg.effect.factor;
+    for (const upg of this.UPGRADES) {
+      if (this._purchased.has(upg.id) && upg.effect.type === 'prestige-bonus') {
+        this.prestigeMultiplier += upg.effect.factor;
+      }
     }
   },
 
-  // ── Serialization ─────────────────────────────────────
   serialize() {
     return {
       protons:            this.protons,

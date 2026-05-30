@@ -258,6 +258,9 @@ aside h2, section h2 {
   transition: background 0.1s, border-color 0.1s;
 }
 
+/* inner content passes clicks through to the button */
+.btn-buy-drill > * { pointer-events: none; }
+
 .btn-buy-drill:hover:not(:disabled) {
   background: var(--accent-dim);
   color: #fff;
@@ -342,6 +345,13 @@ aside h2, section h2 {
 .upgrade-card .upg-cost {
   font-size: 0.65rem;
   color: var(--gold);
+}
+
+.upg-element-cost {
+  color: var(--accent-dim);
+  font-size: 0.6rem;
+  display: block;
+  margin-top: 0.1rem;
 }
 
 /* ── Discovery Toast ────────────────────────────────────── */

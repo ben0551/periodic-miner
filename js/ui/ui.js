@@ -197,7 +197,7 @@ const UI = {
       card.innerHTML = `
         <div class="upg-title">${upg.name}</div>
         <div class="upg-desc">${upg.desc}</div>
-        <div class="upg-cost">${purchased ? '✓ Purchased' : `${this.formatNum(upg.cost)} Protons`}</div>
+        <div class="upg-cost">${purchased ? '✓ Purchased' : this._formatUpgradeCost(upg)}</div>
       `;
 
       if (!purchased) {
@@ -290,6 +290,20 @@ const UI = {
     `;
 
     document.getElementById('modal-overlay').classList.remove('hidden');
+  },
+
+  _formatUpgradeCost(upg) {
+    let html = `${this.formatNum(upg.cost)} Protons`;
+    if (upg.elementCost?.length) {
+      const parts = upg.elementCost.map(ec => {
+        const sym = ELEMENT_BY_NUMBER[ec.atomicNumber]?.symbol ?? '?';
+        const have = ResourceEngine.state[ec.atomicNumber]?.amount ?? 0;
+        const met  = have >= ec.amount;
+        return `<span style="color:${met ? 'var(--success)' : 'var(--danger)'}">${this.formatNum(ec.amount)} ${sym}</span>`;
+      }).join(' · ');
+      html += `<span class="upg-element-cost">${parts}</span>`;
+    }
+    return html;
   },
 
   closeModal() {

@@ -62,10 +62,9 @@ const ResourceEngine = {
       const multiplier = UpgradeEngine.productionMultiplier(el.atomicNumber);
       s.amount += el.baseRate * s.drills * multiplier * deltaSeconds;
 
-      // Noble gases (group 18) generate Protons passively — rate scales with period.
-      // Not multiplied by production upgrades to avoid compounding too hard.
       if (el.group === 18) {
-        UpgradeEngine.protons += el.period * 0.5 * s.drills * deltaSeconds;
+        const nobleM = UpgradeEngine.nobleGasProtonMultiplier(el.atomicNumber);
+        UpgradeEngine.protons += el.period * 0.5 * s.drills * nobleM * deltaSeconds;
       }
     });
 
