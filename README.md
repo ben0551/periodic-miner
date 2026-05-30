@@ -42,6 +42,47 @@ Once you've unlocked **every element in the current Period**, the **Nobel Reset*
 
 Earlier periods keep running throughout — you only lose the period you're resetting.
 
+### Proton Prestige
+Don't want to grind a full period? **Proton Prestige** lets you reset mid-period for a **×1.3 multiplier**:
+- **Cost:** 750,000 Protons
+- **Effect:** Reset current period + ×1.3 permanent boost
+- **Available anytime** — no period completion required
+
+Use this to break up mid-game grinding and power through plateaus.
+
+### Group Bonuses
+Complete all elements in a **periodic table column (group)** to unlock a **×1.2 production multiplier**. Bonuses stack multiplicatively, so completing 3 groups = **×1.728** total boost.
+
+### Features Panel
+Click any element to explore:
+| Tab | What it shows |
+|---|---|
+| **Quiz** | Identify elements by symbol/name or reactions by formula. Earn +2 Protons per correct answer, +5 for streaks! |
+| **Shells** | Electron shell configuration for any element |
+| **Timeline** | Discovery history of all 118 elements by century |
+
+### Radioactive Decay
+Heavy elements (Po through Cm) slowly transmute into lighter ones passively, creating a secondary production chain.
+
+### Expensive Proton Sinks
+Mid-game Proton dumps to accelerate progression:
+| Upgrade | Cost | Effect |
+|---|---|---|
+| **Element Synthesis** | 200,000 P | Instantly unlock one locked element (repeatable) |
+| **Production Overdrive** | 100,000 P | All elements ×10 for 60 seconds |
+
+### Themes
+Choose from **7 vibrant themes** using the dropdown in the top bar:
+- **Cave (Dark)** — Default dark blue aesthetic
+- **Torch (Amber)** — Warm orange cave vibe  
+- **Plasma (Neon)** — Electric green lab
+- **Hydro (Ocean)** — Deep ocean blue
+- **Carbon (Forest)** — Earthy green
+- **Solar (Yellow)** — Bright warm gold
+- **High Contrast** — Pure black/white for accessibility
+
+Theme preference persists across sessions.
+
 ---
 
 ## Keyboard shortcuts
@@ -49,6 +90,7 @@ Earlier periods keep running throughout — you only lose the period you're rese
 |---|---|
 | Click element | Mine manually + see fact |
 | Click splash | Dismiss discovery popup |
+| Theme dropdown | Switch themes anytime |
 
 ---
 
@@ -80,10 +122,19 @@ Or use the VS Code **Live Server** extension.
 
 ## Development
 
-- **`beta` branch** — active development
+- **`beta` branch** — active development (merged to master after testing)
 - **`master` branch** — stable, served via GitHub Pages
-- Save format: `localStorage` key `periodic-miner-save-v2`
+- Save format: `localStorage` key `periodic-miner-save`
 - Debug console helpers: `Game.wipe()`, `Upg.protons += 9999`, `Res.maxUnlockedPeriod = 3`
+
+### Recent Features
+- 7-theme system with persistence
+- Proton Prestige for mid-game resets
+- Quiz system with longest-streak tracking
+- Element Synthesis and Production Overdrive upgrades
+- Educational feedback toasts for quiz answers
+- Radioactive decay and group bonuses
+- Reaction system with electronegativity and rarity mechanics
 
 ---
 
