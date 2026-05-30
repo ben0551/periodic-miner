@@ -318,14 +318,22 @@ aside h2, section h2 {
   display: flex;
   flex-direction: column;
   background: var(--bg-panel);
-  overflow: hidden;
+  overflow: visible;
   transition: height 0.3s;
 }
 
 #panel-features.features-hidden {
-  height: 0;
-  border-top: none;
-  overflow: hidden;
+  height: 32px;
+  border-top: 1px solid var(--border);
+  overflow: visible;
+}
+
+#panel-features.features-hidden #feature-content {
+  display: none;
+}
+
+#panel-features.features-hidden #feature-tabs {
+  display: none;
 }
 
 #features-header {
