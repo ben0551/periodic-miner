@@ -203,6 +203,11 @@ const UpgradeEngine = {
     const el = ELEMENT_BY_NUMBER[atomicNumber];
     let m = this.prestigeMultiplier;
 
+    // Group bonus: ×1.2 per completed group (column)
+    if (el.group !== null) {
+      m *= ResourceEngine.getGroupBonus();
+    }
+
     for (const upg of this.UPGRADES) {
       if (!this._purchased.has(upg.id)) continue;
       const fx = upg.effect;

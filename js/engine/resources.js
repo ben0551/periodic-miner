@@ -44,6 +44,9 @@ const ResourceEngine = {
   // Atomic numbers unlocked since the last UI read — drained by UI.update()
   _newlyUnlocked: [],
 
+  // Groups (columns) with all elements unlocked — grants permanent ×1.2 multiplier
+  _completedGroups: new Set(),
+
   init() {
     this.maxUnlockedPeriod = 1;
     ELEMENTS_SORTED.forEach(el => {
@@ -89,6 +92,7 @@ const ResourceEngine = {
       if (prev && prev.unlocked && prev.amount >= el.unlockCost) {
         s.unlocked = true;
         this._newlyUnlocked.push(el.atomicNumber);
+        this._checkGroupCompletion(el.group);
       }
     });
   },
@@ -143,19 +147,44 @@ const ResourceEngine = {
     // placeholder
   },
 
+  // ── Group Bonuses ─────────────────────────────────────
+  _checkGroupCompletion(group) {
+    // Skip if group is null (lanthanides/actinides) or already completed
+    if (group === null || this._completedGroups.has(group)) return;
+
+    // Check if all elements in this group are unlocked
+    const groupElements = ELEMENTS_SORTED.filter(el => el.group === group && el.period <= this.maxUnlockedPeriod);
+    const allUnlocked = groupElements.length > 0 && groupElements.every(el => this.state[el.atomicNumber]?.unlocked);
+
+    if (allUnlocked) {
+      this._completedGroups.add(group);
+    }
+  },
+
+  getGroupBonus() {
+    // ×1.2 for each completed group
+    return Math.pow(1.2, this._completedGroups.size);
+  },
+
   // ── Serialization ─────────────────────────────────────
   serialize() {
-    return { state: JSON.parse(JSON.stringify(this.state)), maxUnlockedPeriod: this.maxUnlockedPeriod };
+    return {
+      state: JSON.parse(JSON.stringify(this.state)),
+      maxUnlockedPeriod: this.maxUnlockedPeriod,
+      completedGroups: Array.from(this._completedGroups),
+    };
   },
 
   deserialize(saved, elapsedSeconds) {
     if (saved.state) {
       Object.assign(this.state, saved.state);
       this.maxUnlockedPeriod = saved.maxUnlockedPeriod ?? this._inferMaxPeriod();
+      this._completedGroups = new Set(saved.completedGroups ?? []);
     } else {
       // Legacy save (flat state object) — migrate
       Object.assign(this.state, saved);
       this.maxUnlockedPeriod = this._inferMaxPeriod();
+      this._completedGroups = new Set();
     }
     const clamped = Math.min(elapsedSeconds, MAX_OFFLINE_SECONDS);
     if (clamped > 0) this.tick(clamped);
