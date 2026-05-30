@@ -9,10 +9,14 @@ const FeaturesUI = {
   _activeFeature: 'quiz',
   _quizState: {
     streak: 0,
-    mode: 'symbol-to-name', // or 'name-to-symbol'
+    mode: 'symbol-to-name', // or 'name-to-symbol' or 'config-to-element'
     current: null,
   },
-  _trendsProp: 'electronegativity',
+  _builderState: {
+    targetElectrons: null,
+    placed: {}, // { shellIndex: count }
+    current: null,
+  },
   _historyCenturies: {},
 
   // ── Initialization ─────────────────────────────────────
@@ -65,7 +69,7 @@ const FeaturesUI = {
     switch (this._activeFeature) {
       case 'quiz': this._renderQuiz(); break;
       case 'shells': this._renderShells(1); break; // default to H
-      case 'trends': this._renderTrends(); break;
+      case 'builder': this._renderBuilder(); break;
       case 'timeline': this._renderTimeline(); break;
     }
   },
@@ -184,88 +188,130 @@ const FeaturesUI = {
   },
 
   // ── Periodic Trends ────────────────────────────────────
-  _renderTrends() {
-    const props = ['electronegativity', 'atomicRadius', 'meltingPoint', 'atomicMass'];
-    const content = document.getElementById('feature-content');
-
-    const buttons = props.map(p =>
-      `<button class="trend-prop-btn ${this._trendsProp === p ? 'active' : ''}" data-prop="${p}">
-        ${p.replace(/([A-Z])/g, ' $1').trim()}
-      </button>`
-    ).join('');
-
-    const propLabels = {
-      electronegativity: '(Pauling scale)',
-      atomicRadius: '(picometres)',
-      meltingPoint: '(°C)',
-      atomicMass: '(u)'
-    };
-
-    let trendsHtml = `<div class="trends-container">
-      <div class="trend-header">
-        <div class="trend-title">${this._trendsProp.replace(/([A-Z])/g, ' $1').trim()} ${propLabels[this._trendsProp]}</div>
-        <div class="trend-legend">
-          <span style="font-size:0.55rem;color:var(--muted)">Colors: Element categories | Opacity: unlocked vs locked</span>
-        </div>
-      </div>
-      <div class="trend-buttons">${buttons}</div>
-      <div class="trends-chart" id="trends-chart"></div>
-    </div>`;
-
-    content.innerHTML = trendsHtml;
-
-    content.querySelectorAll('.trend-prop-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        this._trendsProp = e.currentTarget.dataset.prop;
-        this._renderTrends();
-      });
-    });
-
-    this._drawTrendsChart();
+  // ── Element Builder (learn electron shell filling) ─────
+  _renderBuilder() {
+    if (!this._builderState.current) {
+      this._startNewBuilderChallenge();
+    }
+    this._drawBuilderChallenge();
   },
 
-  _drawTrendsChart() {
-    const chartContainer = document.getElementById('trends-chart');
-    const prop = this._trendsProp;
-    const rows = {};
+  _startNewBuilderChallenge() {
+    const unlockedNumbers = ELEMENTS_SORTED
+      .filter(el => ResourceEngine.state[el.atomicNumber]?.unlocked)
+      .map(el => el.atomicNumber);
 
-    // Group by period
-    for (let i = 1; i <= 118; i++) {
-      const el = ELEMENT_BY_NUMBER[i];
-      const s = ResourceEngine.state[i];
-      const props = ELEMENT_PROPS[i];
-      if (!rows[el.period]) rows[el.period] = [];
-
-      const value = props[prop];
-      rows[el.period].push({ atomicNumber: i, value, unlocked: s?.unlocked });
+    if (unlockedNumbers.length === 0) {
+      document.getElementById('feature-content').innerHTML =
+        '<p class="text-muted" style="padding:1rem">Unlock elements to use the builder.</p>';
+      return;
     }
 
-    let html = '';
-    const maxValue = Math.max(...Object.values(rows).flat().map(x => x.value || 0).filter(v => v > 0));
+    // Pick a random unlocked element
+    const num = unlockedNumbers[Math.floor(Math.random() * unlockedNumbers.length)];
+    const props = ELEMENT_PROPS[num];
+    const totalElectrons = props.shells.reduce((a, b) => a + b, 0);
 
-    for (let p = 1; p <= 7; p++) {
-      if (!rows[p]) continue;
-      html += `<div class="trend-row"><span class="trend-label">P${p}:</span><div class="trend-bars">`;
+    this._builderState.current = num;
+    this._builderState.targetElectrons = totalElectrons;
+    this._builderState.placed = {};
+  },
 
-      rows[p].forEach(item => {
-        const el = ELEMENT_BY_NUMBER[item.atomicNumber];
-        if (!item.value) {
-          html += `<div class="trend-bar empty" title="${el.symbol} (no data)"></div>`;
-        } else {
-          const pct = (item.value / maxValue) * 100;
-          const color = UI._CATEGORY_COLORS[el.category] || 'var(--accent)';
-          const opacity = item.unlocked ? 1 : 0.3;
-          const tooltip = `${el.symbol} ${el.name}: ${item.value.toFixed(2)}`;
-          html += `<div class="trend-bar" style="width:${pct}%;background:${color};opacity:${opacity}" title="${tooltip}">
-            <span class="trend-symbol">${el.symbol}</span>
-          </div>`;
+  _drawBuilderChallenge() {
+    const state = this._builderState;
+    const el = ELEMENT_BY_NUMBER[state.current];
+    const props = ELEMENT_PROPS[state.current];
+    const maxShells = props.shells.length;
+
+    let html = `<div class="builder-container">
+      <div class="builder-title">Place ${state.targetElectrons} electrons in shells</div>
+      <div class="builder-hint">Shells fill: 2, then 8, then 18, then 32...</div>
+      <div class="builder-shells">`;
+
+    const shellMaxes = [2, 8, 18, 32];
+    let remainingElectrons = state.targetElectrons;
+
+    for (let i = 0; i < maxShells; i++) {
+      const maxInShell = shellMaxes[i];
+      const placed = state.placed[i] || 0;
+      const correct = props.shells[i];
+
+      html += `<div class="shell-row">
+        <span class="shell-label">Shell ${i + 1}:</span>
+        <div class="shell-display">`;
+
+      // Draw electron slots
+      for (let j = 0; j < maxInShell; j++) {
+        const isFilled = j < placed;
+        const isCorrect = j < correct;
+        const className = isFilled ? 'electron filled' : (isCorrect ? 'electron correct' : 'electron empty');
+        html += `<div class="${className}" data-shell="${i}" data-slot="${j}"></div>`;
+      }
+
+      html += `</div>
+        <span class="shell-count">${placed}/${correct}</span>
+      </div>`;
+    }
+
+    html += `</div>
+      <div class="builder-controls">
+        <button id="builder-add">+ Electron</button>
+        <button id="builder-clear">Clear</button>
+        <button id="builder-submit" ${remainingElectrons === state.targetElectrons ? '' : 'disabled'}>Submit</button>
+      </div>
+    </div>`;
+
+    const content = document.getElementById('feature-content');
+    content.innerHTML = html;
+
+    // Wire up buttons
+    document.getElementById('builder-add').addEventListener('click', () => {
+      const totalPlaced = Object.values(state.placed).reduce((a, b) => a + b, 0);
+      if (totalPlaced < state.targetElectrons) {
+        // Add to first non-full shell
+        for (let i = 0; i < maxShells; i++) {
+          if ((state.placed[i] || 0) < shellMaxes[i]) {
+            state.placed[i] = (state.placed[i] || 0) + 1;
+            break;
+          }
         }
-      });
+        this._drawBuilderChallenge();
+      }
+    });
 
-      html += `</div></div>`;
-    }
+    document.getElementById('builder-clear').addEventListener('click', () => {
+      state.placed = {};
+      this._drawBuilderChallenge();
+    });
 
-    chartContainer.innerHTML = html;
+    document.getElementById('builder-submit').addEventListener('click', () => {
+      // Check if correct
+      let correct = true;
+      for (let i = 0; i < maxShells; i++) {
+        if ((state.placed[i] || 0) !== props.shells[i]) {
+          correct = false;
+          break;
+        }
+      }
+
+      if (correct) {
+        UpgradeEngine.protons += 3;
+        content.innerHTML = `<div class="builder-success">
+          <div style="font-size:1rem;color:var(--success);margin-bottom:0.5rem">✓ Correct!</div>
+          <div style="font-size:0.8rem">${el.symbol} — ${el.name}</div>
+          <div style="font-size:0.7rem;color:var(--gold);margin-top:0.3rem">+3 Protons</div>
+        </div>`;
+        setTimeout(() => {
+          state.current = null;
+          this._renderBuilder();
+        }, 1500);
+      } else {
+        content.querySelector('.builder-submit').style.backgroundColor = 'var(--danger)';
+        setTimeout(() => {
+          this._drawBuilderChallenge();
+        }, 800);
+      }
+    });
   },
 
   // ── Discovery Timeline ─────────────────────────────────
