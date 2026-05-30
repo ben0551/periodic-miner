@@ -22,19 +22,20 @@
 //     category      — visual grouping for the table
 // ============================================================
 
-// Helper to compute default scaling values
+// Scaling helpers — tuned for ~1 week playtime.
+// Each period takes exponentially longer; Nobel Prize resets are required to progress.
 function _defaultRate(atomicNumber) {
-  return Math.max(0.001, 10 / Math.pow(atomicNumber, 1.2));
+  return Math.max(0.001, 1.0 / Math.pow(atomicNumber, 1.15));
 }
 
 function _defaultUnlockCost(atomicNumber) {
-  if (atomicNumber === 1) return 0; // H is always unlocked
-  return Math.floor(50 * Math.pow(1.8, atomicNumber - 2));
+  if (atomicNumber === 1) return 0;
+  return Math.floor(100 * Math.pow(1.6, atomicNumber - 2));
 }
 
 function _defaultDrillCost(atomicNumber) {
   if (atomicNumber === 1) return 0;
-  return Math.floor(10 * Math.pow(1.5, atomicNumber - 2));
+  return Math.floor(20 * Math.pow(1.65, atomicNumber - 2));
 }
 
 // ── Element Definitions ──────────────────────────────────
@@ -44,8 +45,8 @@ function _defaultDrillCost(atomicNumber) {
 
 const ELEMENTS = [
   // ── Period 1 ──────────────────────────────────────────
-  { atomicNumber: 1,   symbol: 'H',  name: 'Hydrogen',      period: 1, group: 1,  tableRow: 1, tableCol: 1,  category: 'nonmetal',        baseRate: 10,    unlockCost: 0,         drillCostBase: 20 },
-  { atomicNumber: 2,   symbol: 'He', name: 'Helium',         period: 1, group: 18, tableRow: 1, tableCol: 18, category: 'noble-gas',       baseRate: 5,     unlockCost: 100,       drillCostBase: 50 },
+  { atomicNumber: 1,   symbol: 'H',  name: 'Hydrogen',      period: 1, group: 1,  tableRow: 1, tableCol: 1,  category: 'nonmetal',        baseRate: 3.0,   unlockCost: 0,         drillCostBase: 20 },
+  { atomicNumber: 2,   symbol: 'He', name: 'Helium',         period: 1, group: 18, tableRow: 1, tableCol: 18, category: 'noble-gas',       baseRate: 0.5,   unlockCost: 200,       drillCostBase: 50 },
 
   // ── Period 2 ──────────────────────────────────────────
   { atomicNumber: 3,   symbol: 'Li', name: 'Lithium',        period: 2, group: 1,  tableRow: 2, tableCol: 1,  category: 'alkali-metal',    baseRate: null,  unlockCost: null,      drillCostBase: null },

@@ -76,15 +76,51 @@ const TableUI = {
       <div class="prod-bar" style="width:0%"></div>
     `;
 
-    cell.addEventListener('click', () => {
+    cell.addEventListener('click', (e) => {
+      e.preventDefault();
       const s = ResourceEngine.state[el.atomicNumber];
       if (s && s.unlocked) {
         ResourceEngine.manualMine(el.atomicNumber);
+        UI.showSplash(el.atomicNumber, false);
       } else {
         UI.openElementModal(el.atomicNumber);
       }
     });
+
+    // Info strip on hover
+    cell.addEventListener('mouseenter', () => TableUI._setInfoStrip(el));
+    cell.addEventListener('mouseleave', () => TableUI._clearInfoStrip());
+
     return cell;
+  },
+
+  // ── Info strip (bottom of table panel) ───────────────
+  _setInfoStrip(el) {
+    const strip   = document.getElementById('element-info-strip');
+    const symEl   = document.getElementById('info-symbol');
+    const nameEl  = document.getElementById('info-name');
+    const factEl  = document.getElementById('info-fact');
+    const s       = ResourceEngine.state[el.atomicNumber];
+    const color   = UI._CATEGORY_COLORS?.[el.category] ?? 'var(--accent)';
+
+    symEl.textContent  = el.symbol;
+    symEl.style.color  = color;
+    nameEl.textContent = `${el.name}  #${el.atomicNumber} · ${el.category.replace(/-/g,' ')}`;
+
+    if (s?.unlocked) {
+      factEl.textContent = getElementFact(el.atomicNumber);
+    } else {
+      const prev = ELEMENT_BY_NUMBER[el.atomicNumber - 1];
+      factEl.textContent = el.atomicNumber > 1
+        ? `Locked — requires ${el.unlockCost.toLocaleString()} ${prev?.symbol ?? ''}`
+        : 'Always available';
+    }
+
+    strip.classList.remove('empty');
+  },
+
+  _clearInfoStrip() {
+    document.getElementById('element-info-strip').classList.add('empty');
   },
 
   // ── Light update — called every UI frame ──────────────

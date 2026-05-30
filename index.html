@@ -3,64 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Period Miner</title>
+  <title>Periodic Miner</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- ============================================================
-       PERIOD MINER — Main Layout
-       Three-panel layout:
-         LEFT   — resource chain panel (active element stats + buy drills)
-         CENTER — periodic table board (the main game map)
-         RIGHT  — upgrades / research panel
-  ============================================================ -->
-
   <header id="game-header">
-    <h1>Period Miner</h1>
+    <h1>Periodic Miner</h1>
     <div id="header-stats">
       <span id="stat-protons">Protons: 0</span>
       <span id="stat-rank">Period: 1</span>
-      <span id="stat-total-elements">Elements Unlocked: 1</span>
+      <span id="stat-total-elements">Elements: 1</span>
     </div>
     <div id="header-actions">
-      <button id="btn-prestige" class="btn-prestige" disabled>Nobel Prize Reset</button>
-      <button id="btn-save">Save</button>
+      <button id="btn-prestige" class="btn-prestige" disabled>Nobel Reset</button>
+      <button id="btn-theme" title="Toggle light/dark mode">☀</button>
+      <button id="btn-reset" title="Reset all progress">Reset</button>
     </div>
   </header>
 
+  <!-- Cave ceiling stalactites (below header) -->
+  <svg id="cave-ceiling" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true">
+    <path class="cave-rock" d="M0 0 H1440 V15
+      L1400 15 L1380 48 L1360 15
+      L1325 15 L1305 42 L1285 15
+      L1250 15 L1225 50 L1200 15
+      L1165 15 L1148 38 L1130 15
+      L1095 15 L1072 45 L1050 15
+      L1015 15 L995 40 L975 15
+      L940 15 L918 50 L896 15
+      L861 15 L843 36 L825 15
+      L790 15 L767 46 L745 15
+      L710 15 L690 42 L670 15
+      L635 15 L613 50 L591 15
+      L556 15 L535 38 L514 15
+      L479 15 L458 44 L437 15
+      L402 15 L382 40 L362 15
+      L327 15 L305 50 L283 15
+      L248 15 L228 36 L208 15
+      L173 15 L152 45 L131 15
+      L96 15 L75 42 L54 15
+      L19 15 L0 25 Z"/>
+  </svg>
+
   <main id="game-layout">
 
-    <!-- LEFT: Active resource chain for the selected element group -->
     <aside id="panel-chain">
       <h2>Mining Chain</h2>
-      <div id="chain-list">
-        <!-- Populated by ui/ui.js: one row per unlocked element -->
-      </div>
+      <div id="chain-list"></div>
     </aside>
 
-    <!-- CENTER: The periodic table as game board -->
     <section id="panel-table">
       <h2>The Table</h2>
-      <div id="periodic-table">
-        <!-- Populated by ui/table.js -->
+      <div id="periodic-table"></div>
+      <!-- Hover/click info strip — shows element name + random fact -->
+      <div id="element-info-strip" class="empty">
+        <div id="info-symbol"></div>
+        <div id="info-body">
+          <div id="info-name"></div>
+          <div id="info-fact"></div>
+        </div>
       </div>
     </section>
 
-    <!-- RIGHT: Upgrades / research -->
     <aside id="panel-upgrades">
       <h2>Research</h2>
       <div id="upgrade-tabs">
         <button class="tab-btn active" data-tab="available">Available</button>
+        <button class="tab-btn" data-tab="reactions">Reactions</button>
         <button class="tab-btn" data-tab="purchased">Purchased</button>
       </div>
-      <div id="upgrade-list">
-        <!-- Populated by ui/ui.js -->
-      </div>
+      <div id="upgrade-list"></div>
     </aside>
 
   </main>
 
-  <!-- Element detail modal (click on locked table cell) -->
+  <!-- Cave floor stalagmites -->
+  <svg id="cave-floor" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true">
+    <path class="cave-rock" d="M0 50 H1440 V35
+      L1400 35 L1380 2 L1360 35
+      L1325 35 L1305 8 L1285 35
+      L1250 35 L1225 0 L1200 35
+      L1165 35 L1148 12 L1130 35
+      L1095 35 L1072 5 L1050 35
+      L1015 35 L995 10 L975 35
+      L940 35 L918 0 L896 35
+      L861 35 L843 14 L825 35
+      L790 35 L767 4 L745 35
+      L710 35 L690 8 L670 35
+      L635 35 L613 0 L591 35
+      L556 35 L535 12 L514 35
+      L479 35 L458 6 L437 35
+      L402 35 L382 10 L362 35
+      L327 35 L305 0 L283 35
+      L248 35 L228 14 L208 35
+      L173 35 L152 5 L131 35
+      L96 35 L75 8 L54 35
+      L19 35 L0 45 Z"/>
+  </svg>
+
+  <!-- Element detail modal (locked cells) -->
   <div id="modal-overlay" class="hidden">
     <div id="modal-element">
       <button id="modal-close">✕</button>
@@ -68,14 +109,24 @@
     </div>
   </div>
 
-  <!-- Discovery toasts (bottom-right) -->
-  <div id="toast-container"></div>
+  <!-- Centered discovery splash (new element unlock or click-to-fact) -->
+  <div id="splash-overlay" class="hidden">
+    <div id="splash-card">
+      <div id="splash-symbol"></div>
+      <div id="splash-title"></div>
+      <div id="splash-subtitle"></div>
+      <div id="splash-fact"></div>
+      <div class="splash-dismiss">Click anywhere to continue</div>
+    </div>
+  </div>
 
   <!-- Load order: data → engine → ui → main -->
   <script src="js/data/elements.js"></script>
   <script src="js/data/element-facts.js"></script>
+  <script src="js/data/reactions.js"></script>
   <script src="js/engine/resources.js"></script>
   <script src="js/engine/upgrades.js"></script>
+  <script src="js/engine/reaction-engine.js"></script>
   <script src="js/engine/game.js"></script>
   <script src="js/ui/table.js"></script>
   <script src="js/ui/ui.js"></script>

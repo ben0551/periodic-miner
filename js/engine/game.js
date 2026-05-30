@@ -42,6 +42,7 @@ const GameLoop = {
   init() {
     ResourceEngine.init();
     UpgradeEngine.init();
+    ReactionEngine.init();
 
     const saved = this._loadRaw();
     if (saved) {
@@ -51,9 +52,13 @@ const GameLoop = {
     TableUI.render();
     UI.render();
 
-    document.getElementById('btn-save').addEventListener('click', () => this.save());
+    // Auto-saves every 30s — manual save removed; Reset button handled in main.js
     document.getElementById('btn-prestige').addEventListener('click', () => this._handlePrestige());
     document.getElementById('modal-close').addEventListener('click', () => UI.closeModal());
+    // Close modal when clicking the dark backdrop (not the card itself)
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal-overlay')) UI.closeModal();
+    });
   },
 
   // ── Main loop ─────────────────────────────────────────
@@ -105,8 +110,13 @@ const GameLoop = {
     const period = this._prestigeReadyPeriod();
     if (!period) return;
 
+    const bonus  = 1.0 + period * 0.5;
+    const next   = period + 1;
     const confirmed = confirm(
-      `Nobel Prize Reset!\n\nReset all Period ${period} progress for a permanent ${Math.round((UpgradeEngine.prestigeMultiplier - 1) * 100 + 10)}% production bonus?\n\nYour Protons and purchased upgrades are kept.`
+      `Nobel Prize Reset — Period ${period}\n\n` +
+      `Reset all Period ${period} elements and receive a permanent ×${bonus.toFixed(1)} production multiplier?\n\n` +
+      `This unlocks Period ${next}. Your Protons and purchased upgrades are kept.\n\n` +
+      `Earlier periods keep running — you only lose Period ${period} stockpiles.`
     );
     if (!confirmed) return;
 
@@ -116,40 +126,43 @@ const GameLoop = {
     this._updatePrestigeButton();
   },
 
-  // Returns the highest complete period eligible for prestige, or null.
+  // Returns the current period if ALL its elements are unlocked, else null.
+  // Only the active period (maxUnlockedPeriod) is eligible — not earlier ones.
   _prestigeReadyPeriod() {
-    for (let p = 1; p <= 7; p++) {
-      const periodElements = ELEMENTS_SORTED.filter(el => el.period === p);
-      const allUnlocked = periodElements.every(
-        el => ResourceEngine.state[el.atomicNumber].unlocked
-      );
-      if (allUnlocked) return p;
-    }
-    return null;
+    const p = ResourceEngine.maxUnlockedPeriod;
+    const periodElements = ELEMENTS_SORTED.filter(el => el.period === p);
+    const allUnlocked = periodElements.every(
+      el => ResourceEngine.state[el.atomicNumber]?.unlocked
+    );
+    return allUnlocked ? p : null;
   },
 
   _updatePrestigeButton() {
-    const btn = document.getElementById('btn-prestige');
-    const ready = this._prestigeReadyPeriod();
-    btn.disabled = !ready;
-    btn.textContent = ready
-      ? `Nobel Prize Reset (Period ${ready})`
-      : 'Nobel Prize Reset';
+    const btn    = document.getElementById('btn-prestige');
+    const period = this._prestigeReadyPeriod();
+    const next   = ResourceEngine.maxUnlockedPeriod;
+    btn.disabled = !period;
+    if (period) {
+      const bonus = (1.0 + period * 0.5).toFixed(1);
+      btn.textContent = `Nobel Reset P${period} → ×${bonus} + Unlock P${period + 1}`;
+    } else {
+      btn.textContent = `Nobel Reset (complete Period ${next} first)`;
+    }
   },
 
   // ── Save / Load ───────────────────────────────────────
   save() {
-    const payload = {
-      version:    1,
-      savedAt:    Date.now(),
-      resources:  ResourceEngine.serialize(),
-      upgrades:   UpgradeEngine.serialize(),
-    };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
-    // Brief visual feedback
-    const btn = document.getElementById('btn-save');
-    btn.textContent = 'Saved!';
-    setTimeout(() => btn.textContent = 'Save', 1000);
+    // Defer save to avoid blocking game loop
+    setTimeout(() => {
+      const payload = {
+        version:    2,
+        savedAt:    Date.now(),
+        resources:  ResourceEngine.serialize(),
+        upgrades:   UpgradeEngine.serialize(),
+        reactions:  ReactionEngine.serialize(),
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+    }, 0);
   },
 
   _loadRaw() {
@@ -166,6 +179,7 @@ const GameLoop = {
     const elapsedS  = elapsedMs / 1000;
 
     UpgradeEngine.deserialize(saved.upgrades ?? {});
+    ReactionEngine.deserialize(saved.reactions ?? {});
     ResourceEngine.deserialize(saved.resources ?? {}, elapsedS);
   },
 

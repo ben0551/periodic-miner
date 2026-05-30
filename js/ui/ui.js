@@ -33,6 +33,8 @@
 
 const UI = {
   _activeTab: 'available',
+  _lastNotifiedPrestigePeriod: 0,
+  _chainRenderPending: false,
 
   // ── Formatting helpers ────────────────────────────────
   formatNum(n) {
@@ -68,22 +70,89 @@ const UI = {
     });
   },
 
+  // Category → display colour map (mirrors CSS --cat-color vars)
+  _CATEGORY_COLORS: {
+    'alkali-metal':     '#ff6b6b',
+    'alkaline-earth':   '#ffa07a',
+    'transition-metal': '#87ceeb',
+    'post-transition':  '#98fb98',
+    'metalloid':        '#dda0dd',
+    'nonmetal':         '#7fffd4',
+    'halogen':          '#ffd700',
+    'noble-gas':        '#00d4ff',
+    'lanthanide':       '#ff69b4',
+    'actinide':         '#ff8c00',
+  },
+
   // ── Per-frame update (cheap) ──────────────────────────
   update() {
     this._updateChain();
     this._updateHeader();
-    this._updateUpgradeAffordability();
+    if (this._activeTab === 'reactions') {
+      this._updateReactions();
+    } else {
+      this._updateUpgradeAffordability();
+    }
     GameLoop._updatePrestigeButton();
+    this._checkPrestigeReady(); // notify when period is complete
     this._drainDiscoveryQueue();
+    this._drainReactionQueue();
+  },
+
+  _checkPrestigeReady() {
+    const period = ResourceEngine.maxUnlockedPeriod;
+    if (period <= this._lastNotifiedPrestigePeriod) return;
+
+    const periodElements = ELEMENTS_SORTED.filter(el => el.period === period);
+    const allUnlocked = periodElements.every(el => ResourceEngine.state[el.atomicNumber]?.unlocked);
+
+    if (allUnlocked) {
+      this._lastNotifiedPrestigePeriod = period;
+      this._showPrestigeReadyNotification(period);
+    }
+  },
+
+  _showPrestigeReadyNotification(period) {
+    const next = period + 1;
+    const bonus = (1.0 + period * 0.5).toFixed(1);
+    const msg = `Period ${period} Complete! Nobel Prize Reset available → ×${bonus} production + unlock Period ${next}`;
+
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+      position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+      background: var(--success); color: var(--bg-deep); padding: 0.75rem 1.5rem;
+      border-radius: 6px; font-size: 0.75rem; z-index: 300;
+      box-shadow: 0 0 20px rgba(68,255,136,0.4);
+      animation: prestige-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    `;
+    notif.textContent = msg;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 6000);
   },
 
   _drainDiscoveryQueue() {
     while (ResourceEngine._newlyUnlocked.length > 0) {
-      this._showDiscoveryToast(ResourceEngine._newlyUnlocked.shift());
+      this.showSplash(ResourceEngine._newlyUnlocked.shift(), true);
+    }
+  },
+
+  _drainReactionQueue() {
+    while (ReactionEngine._newlyFired.length > 0) {
+      this._showReactionSplash(ReactionEngine._newlyFired.shift());
     }
   },
 
   // ── Chain Panel ───────────────────────────────────────
+  _queueChainRender() {
+    if (this._chainRenderPending) return;
+    this._chainRenderPending = true;
+    requestAnimationFrame(() => {
+      this._renderChain();
+      this._chainRenderPending = false;
+    });
+  },
+
   _renderChain() {
     const list = document.getElementById('chain-list');
     list.innerHTML = '';
@@ -124,7 +193,7 @@ const UI = {
     list.querySelectorAll('.btn-buy-drill').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const n = parseInt(e.currentTarget.dataset.atomic, 10);
-        if (ResourceEngine.buyDrill(n)) this._renderChain();
+        if (ResourceEngine.buyDrill(n)) this._queueChainRender();
       });
     });
   },
@@ -173,12 +242,27 @@ const UI = {
 
   // ── Upgrades Panel ────────────────────────────────────
   _renderUpgrades() {
+    if (this._activeTab === 'reactions') { this._renderReactions(); return; }
+
     const list = document.getElementById('upgrade-list');
     list.innerHTML = '';
 
-    const upgs = this._activeTab === 'available'
+    let upgs = this._activeTab === 'available'
       ? UpgradeEngine.available()
       : UpgradeEngine.UPGRADES.filter(u => UpgradeEngine.isPurchased(u.id));
+
+    // Sort available upgrades: affordable first, then by progress toward affordability
+    if (this._activeTab === 'available') {
+      upgs.sort((a, b) => {
+        const aAffordable = UpgradeEngine.canAfford(a.id);
+        const bAffordable = UpgradeEngine.canAfford(b.id);
+        if (aAffordable !== bAffordable) return bAffordable ? 1 : -1;
+        // Both affordable or both unaffordable: sort by progress (closest to affordable first)
+        const aProgress = this._calcUpgradeProgress(a);
+        const bProgress = this._calcUpgradeProgress(b);
+        return bProgress - aProgress;
+      });
+    }
 
     if (upgs.length === 0) {
       list.innerHTML = `<p class="text-muted" style="font-size:0.7rem;padding:0.5rem">
@@ -188,16 +272,18 @@ const UI = {
     }
 
     upgs.forEach(upg => {
-      const card = document.createElement('div');
+      const card      = document.createElement('div');
       const purchased = UpgradeEngine.isPurchased(upg.id);
       const affordable = UpgradeEngine.canAfford(upg.id);
-      card.className = `upgrade-card${purchased ? ' purchased' : ''}${!affordable && !purchased ? ' unaffordable' : ''}`;
+      card.className  = `upgrade-card${purchased ? ' purchased' : ''}${!affordable && !purchased ? ' unaffordable' : ''}`;
       card.dataset.upgradeId = upg.id;
 
+      const progress = purchased ? 100 : this._calcUpgradeProgress(upg);
       card.innerHTML = `
         <div class="upg-title">${upg.name}</div>
         <div class="upg-desc">${upg.desc}</div>
         <div class="upg-cost">${purchased ? '✓ Purchased' : this._formatUpgradeCost(upg)}</div>
+        ${!purchased ? `<div class="upg-progress"><div class="upg-progress-fill" style="width:${progress}%"></div></div>` : ''}
       `;
 
       if (!purchased) {
@@ -213,11 +299,96 @@ const UI = {
     });
   },
 
+  _calcUpgradeProgress(upg) {
+    let minPct = Math.min(100, (UpgradeEngine.protons / upg.cost) * 100);
+    if (upg.elementCost) {
+      for (const ec of upg.elementCost) {
+        const have = ResourceEngine.state[ec.atomicNumber]?.amount ?? 0;
+        minPct = Math.min(minPct, Math.min(100, (have / ec.amount) * 100));
+      }
+    }
+    return Math.floor(minPct);
+  },
+
   _updateUpgradeAffordability() {
-    if (this._activeTab !== 'available') return;
+    if (this._activeTab === 'reactions') return;
     document.querySelectorAll('.upgrade-card:not(.purchased)').forEach(card => {
-      const id = card.dataset.upgradeId;
+      const id  = card.dataset.upgradeId;
+      const upg = UpgradeEngine.UPGRADES.find(u => u.id === id);
       card.classList.toggle('unaffordable', !UpgradeEngine.canAfford(id));
+      const fill = card.querySelector('.upg-progress-fill');
+      if (fill && upg) fill.style.width = this._calcUpgradeProgress(upg) + '%';
+      const costEl = card.querySelector('.upg-cost');
+      if (costEl && upg) costEl.innerHTML = this._formatUpgradeCost(upg);
+    });
+  },
+
+  // ── Reactions Tab ─────────────────────────────────────
+  _renderReactions() {
+    const list = document.getElementById('upgrade-list');
+    list.innerHTML = '';
+    REACTIONS.forEach(rx => {
+      const fired   = ReactionEngine._fired.has(rx.id);
+      const canFire = !fired && ReactionEngine._canFire(rx);
+      const card    = document.createElement('div');
+      card.className = `reaction-card${fired ? ' rx-done' : ''}${canFire ? ' rx-ready' : ''}`;
+      card.dataset.rxId = rx.id;
+
+      const rows = rx.reagents.map(r => {
+        const el   = ELEMENT_BY_NUMBER[r.atomicNumber];
+        const have = Math.min(ResourceEngine.state[r.atomicNumber]?.amount ?? 0, r.amount);
+        const pct  = fired ? 100 : Math.min(100, (have / r.amount) * 100);
+        const met  = fired || have >= r.amount;
+        return `
+          <div class="rx-reagent-row">
+            <span class="rx-reagent-symbol ${met ? 'met' : ''}">${el.symbol}</span>
+            <div class="rx-reagent-bar"><div class="rx-reagent-fill" style="width:${pct}%"></div></div>
+            <span class="rx-reagent-count ${met ? 'met' : ''}">${fired ? '✓' : `${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}`}</span>
+          </div>`;
+      }).join('');
+
+      const boostStr = rx.permaBoost ? ` · ${this._describeBoost(rx.permaBoost)}` : '';
+      card.innerHTML = `
+        <div class="rx-header">
+          <span class="rx-formula">${rx.formula}</span>
+          <span class="rx-name">${rx.name}</span>
+          <span class="rx-reward">+${rx.protonReward}⚛${boostStr}</span>
+        </div>
+        <div class="rx-flavour">${rx.flavour}</div>
+        <div class="rx-reagents">${rows}</div>
+        ${fired ? '<div class="rx-status">✓ Reacted</div>' : ''}
+      `;
+      list.appendChild(card);
+    });
+  },
+
+  _describeBoost(boost) {
+    const f = `×${boost.factor}`;
+    if (boost.type === 'all')      return `all ${f}`;
+    if (boost.type === 'element')  return `${ELEMENT_BY_NUMBER[boost.atomicNumber]?.symbol} ${f}`;
+    if (boost.type === 'period')   return `Period ${boost.period} ${f}`;
+    if (boost.type === 'category') return `${boost.category.replace(/-/g,' ')} ${f}`;
+    return '';
+  },
+
+  _updateReactions() {
+    if (ReactionEngine._newlyFired.length > 0) { this._renderReactions(); return; }
+    document.querySelectorAll('.reaction-card:not(.rx-done)').forEach(card => {
+      const rxId = card.dataset.rxId;
+      const rx   = REACTIONS.find(r => r.id === rxId);
+      if (!rx) return;
+      card.classList.toggle('rx-ready', ReactionEngine._canFire(rx));
+      rx.reagents.forEach((r, i) => {
+        const have    = Math.min(ResourceEngine.state[r.atomicNumber]?.amount ?? 0, r.amount);
+        const pct     = Math.min(100, (have / r.amount) * 100);
+        const met     = have >= r.amount;
+        const fills   = card.querySelectorAll('.rx-reagent-fill');
+        const counts  = card.querySelectorAll('.rx-reagent-count');
+        const symbols = card.querySelectorAll('.rx-reagent-symbol');
+        if (fills[i])   fills[i].style.width = pct + '%';
+        if (counts[i])  { counts[i].textContent = `${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}`; counts[i].classList.toggle('met', met); }
+        if (symbols[i]) symbols[i].classList.toggle('met', met);
+      });
     });
   },
 
@@ -310,43 +481,52 @@ const UI = {
     document.getElementById('modal-overlay').classList.add('hidden');
   },
 
-  // ── Discovery Toast ───────────────────────────────────
-  _showDiscoveryToast(atomicNumber) {
+  // ── Centered discovery splash ─────────────────────────
+  showSplash(atomicNumber, isNew = false) {
     const el   = ELEMENT_BY_NUMBER[atomicNumber];
     const fact = getElementFact(atomicNumber);
     if (!el) return;
 
-    const container = document.getElementById('toast-container');
+    const color = this._CATEGORY_COLORS[el.category] ?? 'var(--accent)';
+    document.getElementById('splash-symbol').textContent   = el.symbol;
+    document.getElementById('splash-symbol').style.color   = color;
+    document.getElementById('splash-title').textContent    = isNew ? `Discovered: ${el.name}!` : el.name;
+    document.getElementById('splash-subtitle').textContent =
+      `#${el.atomicNumber} · Period ${el.period} · ${el.category.replace(/-/g,' ')}`;
+    document.getElementById('splash-fact').textContent     = fact;
 
-    // Cap visible toasts at 3 — remove oldest if needed
-    while (container.children.length >= 3) {
-      container.removeChild(container.lastChild);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = 'discovery-toast';
-
-    // Use the element's category CSS variable for the symbol colour
-    toast.innerHTML = `
-      <div class="toast-symbol" style="color:var(--accent)">${el.symbol}</div>
-      <div class="toast-body">
-        <div class="toast-header">Discovered: ${el.name} (#${el.atomicNumber})</div>
-        <div class="toast-fact">${fact}</div>
-      </div>
-    `;
-
-    // Dismiss on click
-    toast.addEventListener('click', () => this._dismissToast(toast));
-
-    container.prepend(toast);
-
-    // Auto-dismiss after 7 seconds
-    setTimeout(() => this._dismissToast(toast), 7000);
+    this._showSplashOverlay();
   },
 
-  _dismissToast(toast) {
-    if (!toast.parentNode) return;
-    toast.classList.add('toast-out');
-    setTimeout(() => toast.parentNode?.removeChild(toast), 400);
+  _showReactionSplash(rxId) {
+    const rx = REACTIONS.find(r => r.id === rxId);
+    if (!rx) return;
+    document.getElementById('splash-symbol').textContent   = rx.formula;
+    document.getElementById('splash-symbol').style.color   = 'var(--success)';
+    document.getElementById('splash-title').textContent    = `Reaction: ${rx.name}`;
+    document.getElementById('splash-subtitle').textContent =
+      `+${rx.protonReward} Protons · ${rx.permaBoost ? this._describeBoost(rx.permaBoost) + ' permanent' : ''}`;
+    document.getElementById('splash-fact').textContent     = rx.flavour;
+    this._showSplashOverlay();
   },
+
+  _showSplashOverlay() {
+    const overlay = document.getElementById('splash-overlay');
+    overlay.classList.remove('hidden');
+    // Cancel any pending auto-dismiss
+    clearTimeout(this._splashAutoTimer);
+    if (this._splashDismissCleanup) this._splashDismissCleanup();
+    // Defer dismiss listener one tick — prevents the opening click from immediately closing it
+    clearTimeout(this._splashTimer);
+    this._splashTimer = setTimeout(() => {
+      const dismiss = () => overlay.classList.add('hidden');
+      document.addEventListener('click', dismiss, { once: true, capture: true });
+      this._splashDismissCleanup = () => document.removeEventListener('click', dismiss, { capture: true });
+      this._splashAutoTimer = setTimeout(dismiss, 10000);
+    }, 0);
+  },
+
+  _splashTimer:        null,
+  _splashAutoTimer:    null,
+  _splashDismissCleanup: null,
 };
