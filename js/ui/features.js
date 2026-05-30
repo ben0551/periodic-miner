@@ -247,13 +247,17 @@ const FeaturesUI = {
       html += `<div class="trend-row"><span class="trend-label">P${p}:</span><div class="trend-bars">`;
 
       rows[p].forEach(item => {
+        const el = ELEMENT_BY_NUMBER[item.atomicNumber];
         if (!item.value) {
-          html += `<div class="trend-bar empty"></div>`;
+          html += `<div class="trend-bar empty" title="${el.symbol} (no data)"></div>`;
         } else {
           const pct = (item.value / maxValue) * 100;
-          const color = UI._CATEGORY_COLORS[ELEMENT_BY_NUMBER[item.atomicNumber].category] || 'var(--accent)';
+          const color = UI._CATEGORY_COLORS[el.category] || 'var(--accent)';
           const opacity = item.unlocked ? 1 : 0.3;
-          html += `<div class="trend-bar" style="width:${pct}%;background:${color};opacity:${opacity}" title="${item.value.toFixed(2)}"></div>`;
+          const tooltip = `${el.symbol} ${el.name}: ${item.value.toFixed(2)}`;
+          html += `<div class="trend-bar" style="width:${pct}%;background:${color};opacity:${opacity}" title="${tooltip}">
+            <span class="trend-symbol">${el.symbol}</span>
+          </div>`;
         }
       });
 
