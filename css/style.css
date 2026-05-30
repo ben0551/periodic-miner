@@ -30,26 +30,26 @@ body {
     #0a0a0f;
 }
 
-/* ── Light mode (torchlit cave) ──────────────────────────── */
+/* ── Torch mode (warm amber cave — replaces the old bright light mode) ── */
 body.light-mode {
-  --bg-deep:    #f0e8d0;
-  --bg-panel:   #e4d5b0;
-  --bg-card:    #faf3e0;
-  --accent:     #c06010;
-  --accent-dim: #8b4508;
-  --gold:       #b8860b;
-  --danger:     #aa1111;
-  --success:    #2d7a3d;
-  --text:       #1a1008;
-  --muted:      #6a5030;
-  --border:     #c0955a;
-  --glow:       0 0 8px rgba(192,96,16,0.5);
-  --cave-rock:  #7a5028;
+  --bg-deep:    #2c1a08;
+  --bg-panel:   #3d2510;
+  --bg-card:    #4a3018;
+  --accent:     #e8901a;
+  --accent-dim: #c07010;
+  --gold:       #ffc020;
+  --danger:     #ff5533;
+  --success:    #60cc60;
+  --text:       #f0dca0;
+  --muted:      #9a7840;
+  --border:     #6a4820;
+  --glow:       0 0 8px rgba(232,144,26,0.6);
+  --cave-rock:  #180e04;
   background:
-    linear-gradient(180deg, #c8a050 0%, transparent 15%),
-    linear-gradient(0deg,   #b89060 0%, transparent 10%),
-    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(255,180,60,0.35) 0%, transparent 55%),
-    #f0e8d0;
+    linear-gradient(180deg, #180e04 0%, transparent 12%),
+    linear-gradient(0deg,   #180e04 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(200,100,0,0.35) 0%, transparent 55%),
+    #2c1a08;
 }
 
 html, body {
@@ -140,12 +140,63 @@ aside h2, section h2 {
   margin-bottom: 0.75rem;
 }
 
+/* ── Center panel: flex column so table + info strip share the height ── */
+#panel-table {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#panel-table > h2 { flex-shrink: 0; }
+
 /* ── Periodic Table Grid ────────────────────────────────── */
 #periodic-table {
   display: grid;
-  /* 18 columns for standard table layout */
   grid-template-columns: repeat(18, 1fr);
   gap: 2px;
+  width: 100%;
+}
+
+/* ── Element info strip (bottom of center panel) ────────── */
+#element-info-strip {
+  flex-shrink: 0;
+  height: 54px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 0.75rem;
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+
+#element-info-strip.empty { opacity: 0; }
+
+#info-symbol {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+#info-body { min-width: 0; flex: 1; }
+
+#info-name {
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#info-fact {
+  font-size: 0.6rem;
+  color: var(--muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .element-cell {
