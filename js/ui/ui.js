@@ -565,17 +565,20 @@ const UI = {
       toast.id = 'toast';
       toast.style.cssText = `
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: var(--bg-panel);
         border: 1px solid var(--border);
         color: var(--text);
-        padding: 0.75rem 1rem;
+        padding: 1rem 1.5rem;
         border-radius: 4px;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         z-index: 1000;
-        max-width: 300px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        line-height: 1.4;
       `;
       document.body.appendChild(toast);
     }
