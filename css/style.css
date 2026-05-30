@@ -156,8 +156,6 @@ aside h2, section h2 {
   column-gap: 2px;
   row-gap: 1px;
   width: 100%;
-  flex: 1 1 0;
-  overflow-y: auto;
 }
 
 /* ── Element info strip (bottom of center panel) ────────── */
