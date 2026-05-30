@@ -194,9 +194,15 @@ const UI = {
       btn.addEventListener('click', (e) => {
         const n = parseInt(e.currentTarget.dataset.atomic, 10);
         if (ResourceEngine.buyDrill(n)) {
-          // Only update the specific element that got a drill, not all
+          // Only update the specific element and its chain row, don't trigger full table update
           TableUI._updateElementCell(n);
-          this._queueChainRender();
+          const row = document.querySelector(`[data-atomic-number="${n}"]`);
+          if (row) {
+            const el = ELEMENT_BY_NUMBER[n];
+            const s = ResourceEngine.state[n];
+            row.querySelector('.chain-count').textContent = UI.formatNum(s.amount);
+            row.querySelector('.chain-rate').textContent = UI.formatRate(el.baseRate * s.drills * UpgradeEngine.productionMultiplier(n));
+          }
         }
       });
     });
