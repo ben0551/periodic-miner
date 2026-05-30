@@ -61,6 +61,7 @@ const GameLoop = {
 
     // Auto-saves every 30s — manual save removed; Reset button handled in main.js
     document.getElementById('btn-prestige').addEventListener('click', () => this._handlePrestige());
+    document.getElementById('btn-proton-prestige').addEventListener('click', () => this._handleProtonPrestige());
     document.getElementById('modal-close').addEventListener('click', () => UI.closeModal());
     // Close modal when clicking the dark backdrop (not the card itself)
     document.getElementById('modal-overlay').addEventListener('click', (e) => {
@@ -144,10 +145,52 @@ const GameLoop = {
     return allUnlocked ? p : null;
   },
 
+  _handleProtonPrestige() {
+    const cost = 750000;
+    if (UpgradeEngine.protons < cost) return;
+
+    const period = ResourceEngine.maxUnlockedPeriod;
+    const bonus = 1.3; // ×1.3 multiplier
+
+    const confirmed = confirm(
+      `Proton Prestige — Period ${period}\n\n` +
+      `Cost: ${cost.toLocaleString()} Protons\n\n` +
+      `Reset all Period ${period} elements and receive a permanent ×${bonus} production multiplier?\n\n` +
+      `Your Protons and purchased upgrades are kept.\n\n` +
+      `Earlier periods keep running — you only lose Period ${period} stockpiles.`
+    );
+    if (!confirmed) return;
+
+    UpgradeEngine.protons -= cost;
+    UpgradeEngine.prestigeMultiplier *= bonus;
+
+    // Reset only the current period
+    ELEMENTS_SORTED.forEach(el => {
+      if (el.period === period) {
+        const s = ResourceEngine.state[el.atomicNumber];
+        s.amount = 0;
+        if (el.atomicNumber === 1) {
+          s.drills = 1;
+          s.unlocked = true;
+        } else {
+          s.drills = 0;
+          s.unlocked = false;
+        }
+      }
+    });
+
+    TableUI.render();
+    UI.render();
+    this._updatePrestigeButton();
+  },
+
   _updatePrestigeButton() {
     const btn    = document.getElementById('btn-prestige');
+    const btnProton = document.getElementById('btn-proton-prestige');
     const period = this._prestigeReadyPeriod();
     const next   = ResourceEngine.maxUnlockedPeriod;
+
+    // Nobel Reset button
     btn.disabled = !period;
     if (period) {
       const bonus = (1.0 + period * 0.5).toFixed(1);
@@ -155,6 +198,14 @@ const GameLoop = {
     } else {
       btn.textContent = `Nobel Reset (complete Period ${next} first)`;
     }
+
+    // Proton Prestige button (always available if you have 750k protons)
+    const cost = 750000;
+    const canAfford = UpgradeEngine.protons >= cost;
+    btnProton.disabled = !canAfford;
+    btnProton.textContent = canAfford
+      ? `⚡ Prestige P${next}`
+      : `⚡ Need ${(cost - UpgradeEngine.protons).toLocaleString()} more Protons`;
   },
 
   // ── Save / Load ───────────────────────────────────────

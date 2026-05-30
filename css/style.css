@@ -919,6 +919,22 @@ button { cursor: pointer; }
 .btn-prestige:hover:not(:disabled) { background: rgba(255,215,0,0.15); }
 .btn-prestige:disabled { opacity: 0.3; cursor: not-allowed; }
 
+.btn-prestige-proton {
+  background: transparent;
+  border: 1px solid var(--success);
+  color: var(--success);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: background 0.15s;
+}
+
+.btn-prestige-proton:hover:not(:disabled) { background: rgba(68,255,136,0.15); }
+.btn-prestige-proton:disabled { opacity: 0.3; cursor: not-allowed; }
+
 #btn-save {
   background: transparent;
   border: 1px solid var(--border);
