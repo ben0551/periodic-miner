@@ -68,7 +68,7 @@ const ResourceEngine = {
 
       if (el.group === 18) {
         const nobleM = UpgradeEngine.nobleGasProtonMultiplier(el.atomicNumber);
-        UpgradeEngine.protons += el.period * 0.08 * s.drills * nobleM * deltaSeconds;
+        UpgradeEngine.protons += el.period * 0.15 * s.drills * nobleM * deltaSeconds;
       }
     });
 

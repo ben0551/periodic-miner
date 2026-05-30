@@ -76,7 +76,8 @@ const TableUI = {
       <div class="prod-bar" style="width:0%"></div>
     `;
 
-    cell.addEventListener('click', () => {
+    cell.addEventListener('click', (e) => {
+      e.preventDefault(); // prevent browser text-selection / look-up shortcuts
       const s = ResourceEngine.state[el.atomicNumber];
       if (s && s.unlocked) {
         ResourceEngine.manualMine(el.atomicNumber);

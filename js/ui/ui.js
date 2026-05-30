@@ -425,42 +425,51 @@ const UI = {
   },
 
   // ── Centered discovery splash ─────────────────────────
-  // isNew = true → "Discovered!" header. false → fact lookup on click.
   showSplash(atomicNumber, isNew = false) {
     const el   = ELEMENT_BY_NUMBER[atomicNumber];
     const fact = getElementFact(atomicNumber);
     if (!el) return;
 
     const color = this._CATEGORY_COLORS[el.category] ?? 'var(--accent)';
-    document.getElementById('splash-symbol').textContent  = el.symbol;
-    document.getElementById('splash-symbol').style.color  = color;
-    document.getElementById('splash-title').textContent   = isNew ? `Discovered: ${el.name}!` : el.name;
+    document.getElementById('splash-symbol').textContent   = el.symbol;
+    document.getElementById('splash-symbol').style.color   = color;
+    document.getElementById('splash-title').textContent    = isNew ? `Discovered: ${el.name}!` : el.name;
     document.getElementById('splash-subtitle').textContent =
       `#${el.atomicNumber} · Period ${el.period} · ${el.category.replace(/-/g,' ')}`;
-    document.getElementById('splash-fact').textContent    = fact;
+    document.getElementById('splash-fact').textContent     = fact;
 
-    const overlay = document.getElementById('splash-overlay');
-    overlay.classList.remove('hidden');
-    // Auto-dismiss after 10s if not clicked
-    clearTimeout(this._splashTimer);
-    this._splashTimer = setTimeout(() => overlay.classList.add('hidden'), 10000);
+    this._showSplashOverlay();
   },
 
   _showReactionSplash(rxId) {
     const rx = REACTIONS.find(r => r.id === rxId);
     if (!rx) return;
-    document.getElementById('splash-symbol').textContent  = rx.formula;
-    document.getElementById('splash-symbol').style.color  = 'var(--success)';
-    document.getElementById('splash-title').textContent   = `Reaction: ${rx.name}`;
+    document.getElementById('splash-symbol').textContent   = rx.formula;
+    document.getElementById('splash-symbol').style.color   = 'var(--success)';
+    document.getElementById('splash-title').textContent    = `Reaction: ${rx.name}`;
     document.getElementById('splash-subtitle').textContent =
       `+${rx.protonReward} Protons · ${rx.permaBoost ? this._describeBoost(rx.permaBoost) + ' permanent' : ''}`;
-    document.getElementById('splash-fact').textContent    = rx.flavour;
-
-    const overlay = document.getElementById('splash-overlay');
-    overlay.classList.remove('hidden');
-    clearTimeout(this._splashTimer);
-    this._splashTimer = setTimeout(() => overlay.classList.add('hidden'), 10000);
+    document.getElementById('splash-fact').textContent     = rx.flavour;
+    this._showSplashOverlay();
   },
 
-  _splashTimer: null,
+  _showSplashOverlay() {
+    const overlay = document.getElementById('splash-overlay');
+    overlay.classList.remove('hidden');
+    // Cancel any pending auto-dismiss
+    clearTimeout(this._splashAutoTimer);
+    if (this._splashDismissCleanup) this._splashDismissCleanup();
+    // Defer dismiss listener one tick — prevents the opening click from immediately closing it
+    clearTimeout(this._splashTimer);
+    this._splashTimer = setTimeout(() => {
+      const dismiss = () => overlay.classList.add('hidden');
+      document.addEventListener('click', dismiss, { once: true, capture: true });
+      this._splashDismissCleanup = () => document.removeEventListener('click', dismiss, { capture: true });
+      this._splashAutoTimer = setTimeout(dismiss, 10000);
+    }, 0);
+  },
+
+  _splashTimer:        null,
+  _splashAutoTimer:    null,
+  _splashDismissCleanup: null,
 };

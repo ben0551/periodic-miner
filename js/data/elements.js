@@ -45,8 +45,8 @@ function _defaultDrillCost(atomicNumber) {
 
 const ELEMENTS = [
   // ── Period 1 ──────────────────────────────────────────
-  { atomicNumber: 1,   symbol: 'H',  name: 'Hydrogen',      period: 1, group: 1,  tableRow: 1, tableCol: 1,  category: 'nonmetal',        baseRate: 1.0,   unlockCost: 0,         drillCostBase: 20 },
-  { atomicNumber: 2,   symbol: 'He', name: 'Helium',         period: 1, group: 18, tableRow: 1, tableCol: 18, category: 'noble-gas',       baseRate: 0.5,   unlockCost: 500,       drillCostBase: 100 },
+  { atomicNumber: 1,   symbol: 'H',  name: 'Hydrogen',      period: 1, group: 1,  tableRow: 1, tableCol: 1,  category: 'nonmetal',        baseRate: 3.0,   unlockCost: 0,         drillCostBase: 20 },
+  { atomicNumber: 2,   symbol: 'He', name: 'Helium',         period: 1, group: 18, tableRow: 1, tableCol: 18, category: 'noble-gas',       baseRate: 0.5,   unlockCost: 200,       drillCostBase: 50 },
 
   // ── Period 2 ──────────────────────────────────────────
   { atomicNumber: 3,   symbol: 'Li', name: 'Lithium',        period: 2, group: 1,  tableRow: 2, tableCol: 1,  category: 'alkali-metal',    baseRate: null,  unlockCost: null,      drillCostBase: null },

@@ -55,8 +55,9 @@ const GameLoop = {
     // Auto-saves every 30s — manual save removed; Reset button handled in main.js
     document.getElementById('btn-prestige').addEventListener('click', () => this._handlePrestige());
     document.getElementById('modal-close').addEventListener('click', () => UI.closeModal());
-    document.getElementById('splash-overlay').addEventListener('click', () => {
-      document.getElementById('splash-overlay').classList.add('hidden');
+    // Close modal when clicking the dark backdrop (not the card itself)
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal-overlay')) UI.closeModal();
     });
   },
 

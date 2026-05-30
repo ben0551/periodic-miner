@@ -160,6 +160,8 @@ aside h2, section h2 {
   position: relative;
   transition: border-color 0.15s, box-shadow 0.15s;
   min-width: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Category colors (muted by default, brighter when unlocked) */
