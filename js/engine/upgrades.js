@@ -198,7 +198,7 @@ const UpgradeEngine = {
       id: 'synthesis-catalyst',
       name: 'Element Synthesis',
       desc: 'Instantly unlock one locked element.',
-      cost: 50000,
+      cost: 200000,
       effect: { type: 'element-unlock' },
       requires: [],
     },
