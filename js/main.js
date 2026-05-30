@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   GameLoop.init();
+  FeaturesUI.init();
   GameLoop.start();
 
   // Debug helpers (localhost / file://)
