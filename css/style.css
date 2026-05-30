@@ -52,6 +52,116 @@ body.light-mode {
     #2c1a08;
 }
 
+/* ── Neon theme (electric purple-green lab) ── */
+body.theme-neon {
+  --bg-deep:    #0d0d1a;
+  --bg-panel:   #151525;
+  --bg-card:    #1a1a30;
+  --accent:     #39ff14;
+  --accent-dim: #1a8c0a;
+  --gold:       #ffff00;
+  --danger:     #ff4466;
+  --success:    #00ffff;
+  --text:       #e0e0ff;
+  --muted:      #6a6a9a;
+  --border:     #2a2a4a;
+  --glow:       0 0 12px rgba(57,255,20,0.4);
+  --cave-rock:  #080812;
+  background:
+    linear-gradient(180deg, #0a0a15 0%, transparent 12%),
+    linear-gradient(0deg,   #0a0a15 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(100,0,200,0.15) 0%, transparent 55%),
+    #0d0d1a;
+}
+
+/* ── Ocean theme (deep ocean blue) ── */
+body.theme-ocean {
+  --bg-deep:    #020d1a;
+  --bg-panel:   #0a1628;
+  --bg-card:    #0f1f35;
+  --accent:     #00ffcc;
+  --accent-dim: #00a08a;
+  --gold:       #60dfff;
+  --danger:     #ff6b6b;
+  --success:    #4ade80;
+  --text:       #c8e6f5;
+  --muted:      #6a8aa0;
+  --border:     #1a3a52;
+  --glow:       0 0 10px rgba(0,255,204,0.3);
+  --cave-rock:  #010609;
+  background:
+    linear-gradient(180deg, #010609 0%, transparent 12%),
+    linear-gradient(0deg,   #010609 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(0,100,150,0.2) 0%, transparent 55%),
+    #020d1a;
+}
+
+/* ── Forest theme (earthy green) ── */
+body.theme-forest {
+  --bg-deep:    #0a1205;
+  --bg-panel:   #121a0e;
+  --bg-card:    #1a2516;
+  --accent:     #7fff00;
+  --accent-dim: #558c00;
+  --gold:       #d4af37;
+  --danger:     #ff7f7f;
+  --success:    #5fd35f;
+  --text:       #d8e6c4;
+  --muted:      #7a8a6a;
+  --border:     #2a3a20;
+  --glow:       0 0 10px rgba(127,255,0,0.3);
+  --cave-rock:  #050802;
+  background:
+    linear-gradient(180deg, #050802 0%, transparent 12%),
+    linear-gradient(0deg,   #050802 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(50,100,30,0.2) 0%, transparent 55%),
+    #0a1205;
+}
+
+/* ── Solar theme (bright warm yellow) ── */
+body.theme-solar {
+  --bg-deep:    #1a1200;
+  --bg-panel:   #2a1f08;
+  --bg-card:    #3a2a10;
+  --accent:     #ffe44d;
+  --accent-dim: #cc9900;
+  --gold:       #ffc700;
+  --danger:     #ff5555;
+  --success:    #55dd55;
+  --text:       #f5e6d3;
+  --muted:      #a0905a;
+  --border:     #5a4a30;
+  --glow:       0 0 12px rgba(255,228,77,0.35);
+  --cave-rock:  #0d0a00;
+  background:
+    linear-gradient(180deg, #0d0a00 0%, transparent 12%),
+    linear-gradient(0deg,   #0d0a00 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(200,150,0,0.25) 0%, transparent 55%),
+    #1a1200;
+}
+
+/* ── High Contrast theme (pure accessibility) ── */
+body.theme-contrast {
+  --bg-deep:    #000000;
+  --bg-panel:   #1a1a1a;
+  --bg-card:    #333333;
+  --accent:     #ffff00;
+  --accent-dim: #cccc00;
+  --gold:       #ffff66;
+  --danger:     #ff0000;
+  --success:    #00ff00;
+  --text:       #ffffff;
+  --muted:      #999999;
+  --border:     #666666;
+  --glow:       0 0 8px rgba(255,255,0,0.5);
+  --cave-rock:  #000000;
+  background:
+    linear-gradient(180deg, #000000 0%, transparent 12%),
+    linear-gradient(0deg,   #000000 0%, transparent 8%),
+    none,
+    #000000;
+}
+
 html, body {
   height: 100%;
   color: var(--text);
@@ -477,9 +587,14 @@ aside h2, section h2 {
 .element-cell[data-category="actinide"]           { --cat-color: #ff8c00; }
 
 .element-cell.locked {
-  background: #0d0d15;
-  opacity: 0.4;
+  background: rgba(13, 13, 21, 0.5) !important;
   cursor: not-allowed;
+  border-color: rgba(128, 128, 128, 0.2) !important;
+}
+
+.element-cell.locked .symbol,
+.element-cell.locked .atomic-num {
+  opacity: 0.5 !important;
 }
 
 .element-cell.unlocked {
@@ -517,9 +632,15 @@ aside h2, section h2 {
 }
 
 .element-cell .el-name {
-  font-size: 0.48em;
-  color: #ffffff;
-  text-shadow: 0 0 4px rgba(255,255,255,0.4);
+  font-size: 0.50em !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow:
+    -1.5px -1.5px 0 #000000,
+    1.5px -1.5px 0 #000000,
+    -1.5px 1.5px 0 #000000,
+    1.5px 1.5px 0 #000000,
+    0 0 4px #000000 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -830,18 +951,26 @@ button { cursor: pointer; }
 
 #modal-close:hover { color: var(--text); }
 
-/* ── Theme toggle button ────────────────────────────────── */
+/* ── Theme selector ────────────────────────────────────── */
 #btn-theme {
-  background: transparent;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 0.85rem;
-  padding: 3px 7px;
+  color: var(--text);
+  font-size: 0.75rem;
+  padding: 4px 6px;
   border-radius: 3px;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
+  font-family: var(--font-mono);
 }
-#btn-theme:hover { border-color: var(--accent-dim); color: var(--accent); }
+#btn-theme:hover {
+  border-color: var(--accent-dim);
+  color: var(--accent);
+}
+#btn-theme:focus {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
 
 #btn-reset {
   background: transparent;

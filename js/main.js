@@ -3,16 +3,26 @@
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  const THEMES = ['dark', 'torch', 'neon', 'ocean', 'forest', 'solar', 'contrast'];
+  const savedTheme = localStorage.getItem('periodic-miner-theme') ?? 'dark';
+
   // Apply saved theme before game init to prevent flash
-  if (localStorage.getItem('periodic-miner-theme') === 'light') {
-    document.body.classList.add('light-mode');
-    document.getElementById('btn-theme').textContent = '🌙';
+  function applyTheme(theme) {
+    // Remove all theme classes
+    document.body.classList.remove('light-mode', ...THEMES.map(t => `theme-${t}`));
+    if (theme === 'torch') {
+      document.body.classList.add('light-mode');
+    } else if (theme !== 'dark') {
+      document.body.classList.add(`theme-${theme}`);
+    }
+    document.getElementById('btn-theme').value = theme;
+    localStorage.setItem('periodic-miner-theme', theme);
   }
 
-  document.getElementById('btn-theme').addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light-mode');
-    document.getElementById('btn-theme').textContent = isLight ? '🌙' : '☀';
-    localStorage.setItem('periodic-miner-theme', isLight ? 'light' : 'dark');
+  applyTheme(savedTheme);
+
+  document.getElementById('btn-theme').addEventListener('change', (e) => {
+    applyTheme(e.target.value);
   });
 
   document.getElementById('btn-reset').addEventListener('click', () => {

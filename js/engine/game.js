@@ -167,6 +167,7 @@ const GameLoop = {
         resources:  ResourceEngine.serialize(),
         upgrades:   UpgradeEngine.serialize(),
         reactions:  ReactionEngine.serialize(),
+        features:   FeaturesUI.serialize(),
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
     }, 0);
@@ -188,6 +189,7 @@ const GameLoop = {
     UpgradeEngine.deserialize(saved.upgrades ?? {});
     ReactionEngine.deserialize(saved.reactions ?? {});
     ResourceEngine.deserialize(saved.resources ?? {}, elapsedS);
+    FeaturesUI.deserialize(saved.features ?? {});
   },
 
   // Wipe save and reload (for debug / "new game")

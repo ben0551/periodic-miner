@@ -9,6 +9,7 @@ const FeaturesUI = {
   _activeFeature: 'quiz',
   _quizState: {
     streak: 0,
+    maxStreak: 0,
     mode: 'symbol-to-name', // or 'name-to-symbol' or 'reaction-guess'
     current: null,
   },
@@ -117,7 +118,7 @@ const FeaturesUI = {
           ${isSymbolMode ? `<div class="quiz-symbol">${el.symbol}</div>` : `<div class="quiz-name">${el.name}</div>`}
           <div class="quiz-prompt">${isSymbolMode ? 'Name?' : 'Symbol?'}</div>
         </div>
-        <div class="quiz-streak">Streak: ${this._quizState.streak}</div>
+        <div class="quiz-streak">Streak: ${this._quizState.streak} (Best: ${this._quizState.maxStreak})</div>
         <div class="quiz-options">
           ${options.map((opt, idx) => `
             <button class="quiz-btn" data-correct="${opt === correctAnswer}">
@@ -135,6 +136,11 @@ const FeaturesUI = {
         if (isCorrect) {
           this._quizState.streak++;
           UpgradeEngine.protons += 2;
+          // Award bonus protons for new personal record
+          if (this._quizState.streak > this._quizState.maxStreak) {
+            this._quizState.maxStreak = this._quizState.streak;
+            UpgradeEngine.protons += 5;
+          }
           this._renderQuiz();
         } else {
           this._quizState.streak = 0;
@@ -166,7 +172,7 @@ const FeaturesUI = {
           <div class="quiz-symbol" style="font-family:var(--font-mono);font-size:1.2rem">${rx.formula}</div>
           <div class="quiz-prompt">Which reaction?</div>
         </div>
-        <div class="quiz-streak">Streak: ${this._quizState.streak}</div>
+        <div class="quiz-streak">Streak: ${this._quizState.streak} (Best: ${this._quizState.maxStreak})</div>
         <div class="quiz-options">
           ${options.map((opt, idx) => `
             <button class="quiz-btn" data-correct="${opt === rx.name}">
@@ -184,6 +190,11 @@ const FeaturesUI = {
         if (isCorrect) {
           this._quizState.streak++;
           UpgradeEngine.protons += 2;
+          // Award bonus protons for new personal record
+          if (this._quizState.streak > this._quizState.maxStreak) {
+            this._quizState.maxStreak = this._quizState.streak;
+            UpgradeEngine.protons += 5;
+          }
           this._renderQuiz();
         } else {
           this._quizState.streak = 0;
@@ -278,5 +289,18 @@ const FeaturesUI = {
 
     html += '</div>';
     content.innerHTML = html;
+  },
+
+  // ── Serialization ─────────────────────────────────────
+  serialize() {
+    return {
+      quizState: JSON.parse(JSON.stringify(this._quizState)),
+    };
+  },
+
+  deserialize(saved) {
+    if (saved?.quizState) {
+      this._quizState = saved.quizState;
+    }
   },
 };
