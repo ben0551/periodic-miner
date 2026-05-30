@@ -82,10 +82,8 @@ const FeaturesUI = {
       return;
     }
 
-    // Pick random unlocked element
-    if (!this._quizState.current || !unlockedNumbers.includes(this._quizState.current)) {
-      this._quizState.current = unlockedNumbers[Math.floor(Math.random() * unlockedNumbers.length)];
-    }
+    // Always pick a new random unlocked element
+    this._quizState.current = unlockedNumbers[Math.floor(Math.random() * unlockedNumbers.length)];
 
     const el = ELEMENT_BY_NUMBER[this._quizState.current];
     const isSymbolMode = Math.random() > 0.5;
@@ -195,7 +193,20 @@ const FeaturesUI = {
       </button>`
     ).join('');
 
+    const propLabels = {
+      electronegativity: '(Pauling scale)',
+      atomicRadius: '(picometres)',
+      meltingPoint: '(°C)',
+      atomicMass: '(u)'
+    };
+
     let trendsHtml = `<div class="trends-container">
+      <div class="trend-header">
+        <div class="trend-title">${this._trendsProp.replace(/([A-Z])/g, ' $1').trim()} ${propLabels[this._trendsProp]}</div>
+        <div class="trend-legend">
+          <span style="font-size:0.55rem;color:var(--muted)">Colors: Element categories | Opacity: unlocked vs locked</span>
+        </div>
+      </div>
       <div class="trend-buttons">${buttons}</div>
       <div class="trends-chart" id="trends-chart"></div>
     </div>`;
