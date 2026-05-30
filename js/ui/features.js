@@ -154,6 +154,10 @@ const FeaturesUI = {
         } else {
           this._quizState.streak = 0;
           e.currentTarget.style.backgroundColor = 'var(--danger)';
+          const message = isSymbolMode
+            ? `The correct answer is ${el.name} — ${el.symbol} is the symbol for ${el.name}.`
+            : `The correct answer is ${el.symbol} — the symbol for ${el.name}.`;
+          UI.showToast(message);
           setTimeout(() => this._renderQuiz(), 800);
         }
       });
@@ -208,6 +212,8 @@ const FeaturesUI = {
         } else {
           this._quizState.streak = 0;
           e.currentTarget.style.backgroundColor = 'var(--danger)';
+          const message = `The correct answer is ${rx.name} — the formula is ${rx.formula}.`;
+          UI.showToast(message);
           setTimeout(() => this._renderQuiz(), 800);
         }
       });
