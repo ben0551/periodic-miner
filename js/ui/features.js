@@ -26,6 +26,15 @@ const FeaturesUI = {
         this.render();
       });
     });
+
+    const toggleBtn = document.getElementById('toggle-features');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const panel = document.getElementById('panel-features');
+        panel.classList.toggle('features-hidden');
+      });
+    }
+
     this._buildHistoryCenturies();
     this.render();
   },
