@@ -117,6 +117,7 @@ const TableUI = {
     }
 
     strip.classList.remove('empty');
+    FeaturesUI.updateShellsOnHover(el.atomicNumber);
   },
 
   _clearInfoStrip() {

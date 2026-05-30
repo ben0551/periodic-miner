@@ -51,6 +51,7 @@ const GameLoop = {
 
     TableUI.render();
     UI.render();
+    FeaturesUI.init();
 
     // Auto-saves every 30s — manual save removed; Reset button handled in main.js
     document.getElementById('btn-prestige').addEventListener('click', () => this._handlePrestige());
