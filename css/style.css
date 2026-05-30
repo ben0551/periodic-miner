@@ -266,6 +266,8 @@ aside h2, section h2 {
   column-gap: 2px;
   row-gap: 1px;
   width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
 }
 
 /* ── Element info strip (bottom of center panel) ────────── */
