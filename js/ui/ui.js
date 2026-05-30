@@ -503,7 +503,7 @@ const UI = {
     if (!rx) return;
     document.getElementById('splash-symbol').textContent   = rx.formula;
     document.getElementById('splash-symbol').style.color   = 'var(--success)';
-    document.getElementById('splash-title').textContent    = `Reaction: ${rx.name}`;
+    document.getElementById('splash-title').innerHTML      = `<div style="font-size:0.6rem;color:var(--success);margin-bottom:0.2rem">NEW REACTION</div>${rx.name}`;
     document.getElementById('splash-subtitle').textContent =
       `+${rx.protonReward} Protons · ${rx.permaBoost ? this._describeBoost(rx.permaBoost) + ' permanent' : ''}`;
     document.getElementById('splash-fact').textContent     = rx.flavour;

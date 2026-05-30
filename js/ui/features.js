@@ -171,6 +171,7 @@ const FeaturesUI = {
         <div class="shells-header">${el.symbol} — ${el.name}</div>
         ${svg}
         <div class="shells-config">${shells.join('-')}</div>
+        <div class="shells-tip">Hover over elements in the table to see their electron shells</div>
       </div>
     `;
   },
