@@ -80,6 +80,7 @@ const TableUI = {
       const s = ResourceEngine.state[el.atomicNumber];
       if (s && s.unlocked) {
         ResourceEngine.manualMine(el.atomicNumber);
+        UI.showSplash(el.atomicNumber, false);
       } else {
         UI.openElementModal(el.atomicNumber);
       }

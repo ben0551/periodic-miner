@@ -68,18 +68,43 @@ const UI = {
     });
   },
 
+  // Category → display colour map (mirrors CSS --cat-color vars)
+  _CATEGORY_COLORS: {
+    'alkali-metal':     '#ff6b6b',
+    'alkaline-earth':   '#ffa07a',
+    'transition-metal': '#87ceeb',
+    'post-transition':  '#98fb98',
+    'metalloid':        '#dda0dd',
+    'nonmetal':         '#7fffd4',
+    'halogen':          '#ffd700',
+    'noble-gas':        '#00d4ff',
+    'lanthanide':       '#ff69b4',
+    'actinide':         '#ff8c00',
+  },
+
   // ── Per-frame update (cheap) ──────────────────────────
   update() {
     this._updateChain();
     this._updateHeader();
-    this._updateUpgradeAffordability();
+    if (this._activeTab === 'reactions') {
+      this._updateReactions();
+    } else {
+      this._updateUpgradeAffordability();
+    }
     GameLoop._updatePrestigeButton();
     this._drainDiscoveryQueue();
+    this._drainReactionQueue();
   },
 
   _drainDiscoveryQueue() {
     while (ResourceEngine._newlyUnlocked.length > 0) {
-      this._showDiscoveryToast(ResourceEngine._newlyUnlocked.shift());
+      this.showSplash(ResourceEngine._newlyUnlocked.shift(), true);
+    }
+  },
+
+  _drainReactionQueue() {
+    while (ReactionEngine._newlyFired.length > 0) {
+      this._showReactionSplash(ReactionEngine._newlyFired.shift());
     }
   },
 
@@ -173,6 +198,8 @@ const UI = {
 
   // ── Upgrades Panel ────────────────────────────────────
   _renderUpgrades() {
+    if (this._activeTab === 'reactions') { this._renderReactions(); return; }
+
     const list = document.getElementById('upgrade-list');
     list.innerHTML = '';
 
@@ -188,16 +215,18 @@ const UI = {
     }
 
     upgs.forEach(upg => {
-      const card = document.createElement('div');
+      const card      = document.createElement('div');
       const purchased = UpgradeEngine.isPurchased(upg.id);
       const affordable = UpgradeEngine.canAfford(upg.id);
-      card.className = `upgrade-card${purchased ? ' purchased' : ''}${!affordable && !purchased ? ' unaffordable' : ''}`;
+      card.className  = `upgrade-card${purchased ? ' purchased' : ''}${!affordable && !purchased ? ' unaffordable' : ''}`;
       card.dataset.upgradeId = upg.id;
 
+      const progress = purchased ? 100 : this._calcUpgradeProgress(upg);
       card.innerHTML = `
         <div class="upg-title">${upg.name}</div>
         <div class="upg-desc">${upg.desc}</div>
         <div class="upg-cost">${purchased ? '✓ Purchased' : this._formatUpgradeCost(upg)}</div>
+        ${!purchased ? `<div class="upg-progress"><div class="upg-progress-fill" style="width:${progress}%"></div></div>` : ''}
       `;
 
       if (!purchased) {
@@ -213,11 +242,96 @@ const UI = {
     });
   },
 
+  _calcUpgradeProgress(upg) {
+    let minPct = Math.min(100, (UpgradeEngine.protons / upg.cost) * 100);
+    if (upg.elementCost) {
+      for (const ec of upg.elementCost) {
+        const have = ResourceEngine.state[ec.atomicNumber]?.amount ?? 0;
+        minPct = Math.min(minPct, Math.min(100, (have / ec.amount) * 100));
+      }
+    }
+    return Math.floor(minPct);
+  },
+
   _updateUpgradeAffordability() {
-    if (this._activeTab !== 'available') return;
+    if (this._activeTab === 'reactions') return;
     document.querySelectorAll('.upgrade-card:not(.purchased)').forEach(card => {
-      const id = card.dataset.upgradeId;
+      const id  = card.dataset.upgradeId;
+      const upg = UpgradeEngine.UPGRADES.find(u => u.id === id);
       card.classList.toggle('unaffordable', !UpgradeEngine.canAfford(id));
+      const fill = card.querySelector('.upg-progress-fill');
+      if (fill && upg) fill.style.width = this._calcUpgradeProgress(upg) + '%';
+      const costEl = card.querySelector('.upg-cost');
+      if (costEl && upg) costEl.innerHTML = this._formatUpgradeCost(upg);
+    });
+  },
+
+  // ── Reactions Tab ─────────────────────────────────────
+  _renderReactions() {
+    const list = document.getElementById('upgrade-list');
+    list.innerHTML = '';
+    REACTIONS.forEach(rx => {
+      const fired   = ReactionEngine._fired.has(rx.id);
+      const canFire = !fired && ReactionEngine._canFire(rx);
+      const card    = document.createElement('div');
+      card.className = `reaction-card${fired ? ' rx-done' : ''}${canFire ? ' rx-ready' : ''}`;
+      card.dataset.rxId = rx.id;
+
+      const rows = rx.reagents.map(r => {
+        const el   = ELEMENT_BY_NUMBER[r.atomicNumber];
+        const have = Math.min(ResourceEngine.state[r.atomicNumber]?.amount ?? 0, r.amount);
+        const pct  = fired ? 100 : Math.min(100, (have / r.amount) * 100);
+        const met  = fired || have >= r.amount;
+        return `
+          <div class="rx-reagent-row">
+            <span class="rx-reagent-symbol ${met ? 'met' : ''}">${el.symbol}</span>
+            <div class="rx-reagent-bar"><div class="rx-reagent-fill" style="width:${pct}%"></div></div>
+            <span class="rx-reagent-count ${met ? 'met' : ''}">${fired ? '✓' : `${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}`}</span>
+          </div>`;
+      }).join('');
+
+      const boostStr = rx.permaBoost ? ` · ${this._describeBoost(rx.permaBoost)}` : '';
+      card.innerHTML = `
+        <div class="rx-header">
+          <span class="rx-formula">${rx.formula}</span>
+          <span class="rx-name">${rx.name}</span>
+          <span class="rx-reward">+${rx.protonReward}⚛${boostStr}</span>
+        </div>
+        <div class="rx-flavour">${rx.flavour}</div>
+        <div class="rx-reagents">${rows}</div>
+        ${fired ? '<div class="rx-status">✓ Reacted</div>' : ''}
+      `;
+      list.appendChild(card);
+    });
+  },
+
+  _describeBoost(boost) {
+    const f = `×${boost.factor}`;
+    if (boost.type === 'all')      return `all ${f}`;
+    if (boost.type === 'element')  return `${ELEMENT_BY_NUMBER[boost.atomicNumber]?.symbol} ${f}`;
+    if (boost.type === 'period')   return `Period ${boost.period} ${f}`;
+    if (boost.type === 'category') return `${boost.category.replace(/-/g,' ')} ${f}`;
+    return '';
+  },
+
+  _updateReactions() {
+    if (ReactionEngine._newlyFired.length > 0) { this._renderReactions(); return; }
+    document.querySelectorAll('.reaction-card:not(.rx-done)').forEach(card => {
+      const rxId = card.dataset.rxId;
+      const rx   = REACTIONS.find(r => r.id === rxId);
+      if (!rx) return;
+      card.classList.toggle('rx-ready', ReactionEngine._canFire(rx));
+      rx.reagents.forEach((r, i) => {
+        const have    = Math.min(ResourceEngine.state[r.atomicNumber]?.amount ?? 0, r.amount);
+        const pct     = Math.min(100, (have / r.amount) * 100);
+        const met     = have >= r.amount;
+        const fills   = card.querySelectorAll('.rx-reagent-fill');
+        const counts  = card.querySelectorAll('.rx-reagent-count');
+        const symbols = card.querySelectorAll('.rx-reagent-symbol');
+        if (fills[i])   fills[i].style.width = pct + '%';
+        if (counts[i])  { counts[i].textContent = `${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}`; counts[i].classList.toggle('met', met); }
+        if (symbols[i]) symbols[i].classList.toggle('met', met);
+      });
     });
   },
 
@@ -310,43 +424,43 @@ const UI = {
     document.getElementById('modal-overlay').classList.add('hidden');
   },
 
-  // ── Discovery Toast ───────────────────────────────────
-  _showDiscoveryToast(atomicNumber) {
+  // ── Centered discovery splash ─────────────────────────
+  // isNew = true → "Discovered!" header. false → fact lookup on click.
+  showSplash(atomicNumber, isNew = false) {
     const el   = ELEMENT_BY_NUMBER[atomicNumber];
     const fact = getElementFact(atomicNumber);
     if (!el) return;
 
-    const container = document.getElementById('toast-container');
+    const color = this._CATEGORY_COLORS[el.category] ?? 'var(--accent)';
+    document.getElementById('splash-symbol').textContent  = el.symbol;
+    document.getElementById('splash-symbol').style.color  = color;
+    document.getElementById('splash-title').textContent   = isNew ? `Discovered: ${el.name}!` : el.name;
+    document.getElementById('splash-subtitle').textContent =
+      `#${el.atomicNumber} · Period ${el.period} · ${el.category.replace(/-/g,' ')}`;
+    document.getElementById('splash-fact').textContent    = fact;
 
-    // Cap visible toasts at 3 — remove oldest if needed
-    while (container.children.length >= 3) {
-      container.removeChild(container.lastChild);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = 'discovery-toast';
-
-    // Use the element's category CSS variable for the symbol colour
-    toast.innerHTML = `
-      <div class="toast-symbol" style="color:var(--accent)">${el.symbol}</div>
-      <div class="toast-body">
-        <div class="toast-header">Discovered: ${el.name} (#${el.atomicNumber})</div>
-        <div class="toast-fact">${fact}</div>
-      </div>
-    `;
-
-    // Dismiss on click
-    toast.addEventListener('click', () => this._dismissToast(toast));
-
-    container.prepend(toast);
-
-    // Auto-dismiss after 7 seconds
-    setTimeout(() => this._dismissToast(toast), 7000);
+    const overlay = document.getElementById('splash-overlay');
+    overlay.classList.remove('hidden');
+    // Auto-dismiss after 10s if not clicked
+    clearTimeout(this._splashTimer);
+    this._splashTimer = setTimeout(() => overlay.classList.add('hidden'), 10000);
   },
 
-  _dismissToast(toast) {
-    if (!toast.parentNode) return;
-    toast.classList.add('toast-out');
-    setTimeout(() => toast.parentNode?.removeChild(toast), 400);
+  _showReactionSplash(rxId) {
+    const rx = REACTIONS.find(r => r.id === rxId);
+    if (!rx) return;
+    document.getElementById('splash-symbol').textContent  = rx.formula;
+    document.getElementById('splash-symbol').style.color  = 'var(--success)';
+    document.getElementById('splash-title').textContent   = `Reaction: ${rx.name}`;
+    document.getElementById('splash-subtitle').textContent =
+      `+${rx.protonReward} Protons · ${rx.permaBoost ? this._describeBoost(rx.permaBoost) + ' permanent' : ''}`;
+    document.getElementById('splash-fact').textContent    = rx.flavour;
+
+    const overlay = document.getElementById('splash-overlay');
+    overlay.classList.remove('hidden');
+    clearTimeout(this._splashTimer);
+    this._splashTimer = setTimeout(() => overlay.classList.add('hidden'), 10000);
   },
+
+  _splashTimer: null,
 };

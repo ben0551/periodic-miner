@@ -37,18 +37,22 @@ const ResourceEngine = {
   // state[atomicNumber] = { amount, drills, unlocked }
   state: {},
 
+  // Only elements in periods 1..maxUnlockedPeriod can unlock.
+  // Starts at 1; increments each time the player does a Nobel Prize Reset.
+  maxUnlockedPeriod: 1,
+
   // Atomic numbers unlocked since the last UI read — drained by UI.update()
   _newlyUnlocked: [],
 
   init() {
+    this.maxUnlockedPeriod = 1;
     ELEMENTS_SORTED.forEach(el => {
       this.state[el.atomicNumber] = {
         amount:   0,
         drills:   0,
-        unlocked: el.atomicNumber === 1, // only H starts unlocked
+        unlocked: el.atomicNumber === 1,
       };
     });
-    // Player starts with a few hydrogen drills so the game moves immediately
     this.state[1].drills = 1;
   },
 
@@ -64,17 +68,20 @@ const ResourceEngine = {
 
       if (el.group === 18) {
         const nobleM = UpgradeEngine.nobleGasProtonMultiplier(el.atomicNumber);
-        UpgradeEngine.protons += el.period * 0.5 * s.drills * nobleM * deltaSeconds;
+        UpgradeEngine.protons += el.period * 0.08 * s.drills * nobleM * deltaSeconds;
       }
     });
 
     this._checkUnlocks();
+    ReactionEngine.tick(deltaSeconds);
   },
 
   // ── Check whether new elements should be auto-revealed ─
+  // Elements are only accessible once their period is unlocked via Nobel Prize Reset.
   _checkUnlocks() {
     ELEMENTS_SORTED.forEach(el => {
       if (el.atomicNumber === 1) return;
+      if (el.period > this.maxUnlockedPeriod) return; // period gate
       const s = this.state[el.atomicNumber];
       if (s.unlocked) return;
 
@@ -138,28 +145,46 @@ const ResourceEngine = {
 
   // ── Serialization ─────────────────────────────────────
   serialize() {
-    return JSON.parse(JSON.stringify(this.state));
+    return { state: JSON.parse(JSON.stringify(this.state)), maxUnlockedPeriod: this.maxUnlockedPeriod };
   },
 
   deserialize(saved, elapsedSeconds) {
-    Object.assign(this.state, saved);
+    if (saved.state) {
+      Object.assign(this.state, saved.state);
+      this.maxUnlockedPeriod = saved.maxUnlockedPeriod ?? this._inferMaxPeriod();
+    } else {
+      // Legacy save (flat state object) — migrate
+      Object.assign(this.state, saved);
+      this.maxUnlockedPeriod = this._inferMaxPeriod();
+    }
     const clamped = Math.min(elapsedSeconds, MAX_OFFLINE_SECONDS);
     if (clamped > 0) this.tick(clamped);
   },
 
-  // ── Nobel Prize Prestige reset ─────────────────────────
-  // Resets element stockpiles and drills up to and including
-  // maxPeriod, but does NOT reset Protons or purchased upgrades.
-  // Grants a permanent production multiplier bonus.
-  prestigeReset(maxPeriod) {
+  // For save migration: detect the highest period that had elements unlocked.
+  _inferMaxPeriod() {
+    let maxP = 1;
     ELEMENTS_SORTED.forEach(el => {
-      if (el.period <= maxPeriod) {
+      const s = this.state[el.atomicNumber];
+      if (s && s.unlocked && el.period > maxP) maxP = el.period;
+    });
+    return maxP;
+  },
+
+  // ── Nobel Prize Prestige reset ─────────────────────────
+  // Resets ONLY the current period's elements.
+  // Earlier periods keep running — you don't lose them.
+  // Increments maxUnlockedPeriod so the next period becomes accessible.
+  prestigeReset(period) {
+    ELEMENTS_SORTED.forEach(el => {
+      if (el.period === period) {
         const s = this.state[el.atomicNumber];
-        s.amount  = 0;
-        s.drills  = el.atomicNumber === 1 ? 1 : 0;
-        s.unlocked = el.atomicNumber === 1;
+        s.amount   = 0;
+        s.drills   = el.atomicNumber === 1 ? 1 : 0;
+        s.unlocked = el.atomicNumber === 1 && period === 1;
       }
     });
-    UpgradeEngine.onPrestige(maxPeriod);
+    this.maxUnlockedPeriod = period + 1;
+    UpgradeEngine.onPrestige(period);
   },
 };

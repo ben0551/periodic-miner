@@ -218,6 +218,8 @@ const UpgradeEngine = {
         if (el.category === fx.target.split(':')[1]) m *= fx.factor;
       }
     }
+    // Reaction permanent boosts stack on top
+    m *= ReactionEngine.productionMultiplier(atomicNumber);
     return m;
   },
 
@@ -280,10 +282,12 @@ const UpgradeEngine = {
   },
 
   onPrestige(period) {
-    for (const upg of this.UPGRADES) {
-      if (this._purchased.has(upg.id) && upg.effect.type === 'prestige-bonus') {
-        this.prestigeMultiplier += upg.effect.factor;
-      }
+    // Base multiplicative bonus scales with period: ×1.5 for P1, ×2.0 for P2, ×2.5 for P3, …
+    const base = 1.0 + period * 0.5;
+    this.prestigeMultiplier *= base;
+    // Nobel Legacy upgrade adds 15% on top
+    if (this._purchased.has('prestige-1')) {
+      this.prestigeMultiplier *= 1.15;
     }
   },
 
