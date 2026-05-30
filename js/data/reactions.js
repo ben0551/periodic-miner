@@ -213,6 +213,35 @@ const REACTIONS = [
     permaBoost:   null,
   },
 
+  // ── Early Period 3 Reactions (faster progression) ────────
+  {
+    id:           'sodium-oxide',
+    formula:      'Na₂O',
+    name:         'Sodium Oxide',
+    flavour:      'When sodium burns in oxygen, it forms a yellowish powder. Reacts vigorously with water to form sodium hydroxide.',
+    reagents:     [{ atomicNumber: 11, amount: 300 }, { atomicNumber: 8, amount: 150 }],
+    protonReward: 200,
+    permaBoost:   { type: 'element', atomicNumber: 11, factor: 1.15 },
+  },
+  {
+    id:           'magnesium-chloride',
+    formula:      'MgCl₂',
+    name:         'Magnesium Chloride',
+    flavour:      'A white solid that dissolves in water. Used in de-icing roads and producing metallic magnesium.',
+    reagents:     [{ atomicNumber: 12, amount: 250 }, { atomicNumber: 17, amount: 250 }],
+    protonReward: 220,
+    permaBoost:   { type: 'element', atomicNumber: 12, factor: 1.2 },
+  },
+  {
+    id:           'aluminum-chloride',
+    formula:      'AlCl₃',
+    name:         'Aluminum Chloride',
+    flavour:      'A white solid that easily dissolves in water. Used as a catalyst in organic chemistry and in various industrial processes.',
+    reagents:     [{ atomicNumber: 13, amount: 400 }, { atomicNumber: 17, amount: 350 }],
+    protonReward: 280,
+    permaBoost:   { type: 'element', atomicNumber: 13, factor: 1.15 },
+  },
+
   // ── Electronegativity Reactions (auto-fire) ─────────────
   // High electronegativity nonmetals + low electronegativity metals
   {

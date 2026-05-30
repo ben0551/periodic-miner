@@ -126,6 +126,33 @@ const UpgradeEngine = {
       effect: { type: 'drill-discount', factor: 0.85 },
       requires: ['drill-discount-1'],
     },
+    {
+      id: 'sodium-boost',
+      name: 'Sodium Abundance',
+      desc: 'Sodium mining ×2.5.',
+      cost: 50,
+      elementCost: [{ atomicNumber: 11, amount: 200 }],
+      effect: { type: 'multiply', target: 11, factor: 2.5 },
+      requires: [],
+    },
+    {
+      id: 'magnesium-boost',
+      name: 'Magnesium Oxide Catalyst',
+      desc: 'Magnesium mining ×2.',
+      cost: 60,
+      elementCost: [{ atomicNumber: 12, amount: 150 }],
+      effect: { type: 'multiply', target: 12, factor: 2 },
+      requires: [],
+    },
+    {
+      id: 'chlorine-boost',
+      name: 'Chlorine Extraction',
+      desc: 'Chlorine mining ×3.',
+      cost: 80,
+      elementCost: [{ atomicNumber: 17, amount: 300 }],
+      effect: { type: 'multiply', target: 17, factor: 3 },
+      requires: [],
+    },
 
     // ── Period 4 ──────────────────────────────────────────
     {
