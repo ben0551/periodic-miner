@@ -93,6 +93,7 @@ const ResourceEngine = {
         s.unlocked = true;
         this._newlyUnlocked.push(el.atomicNumber);
         this._checkGroupCompletion(el.group);
+        this._checkRareEarthDiscovery(el.atomicNumber);
       }
     });
   },
@@ -158,6 +159,19 @@ const ResourceEngine = {
 
     if (allUnlocked) {
       this._completedGroups.add(group);
+    }
+  },
+
+  // ── Rare Earth Discovery (auto-fire on first lanthanide) ────
+  _checkRareEarthDiscovery(atomicNumber) {
+    if (atomicNumber < 57 || atomicNumber > 71) return; // Not a lanthanide
+    const rxId = 'rare-earth-discovery';
+    if (ReactionEngine._fired.has(rxId)) return; // Already fired
+
+    // Check if this is the first lanthanide unlocked
+    const anyLanthanideUnlocked = ELEMENTS_SORTED.some(el => el.atomicNumber >= 57 && el.atomicNumber <= 71 && this.state[el.atomicNumber]?.unlocked);
+    if (anyLanthanideUnlocked) {
+      ReactionEngine.fire(rxId);
     }
   },
 

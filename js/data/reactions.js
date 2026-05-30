@@ -186,4 +186,15 @@ const REACTIONS = [
     protonReward: 160,
     permaBoost:   null,
   },
+
+  // ── Rare Earth Discovery (auto-fires on first lanthanide unlock) ────
+  {
+    id:           'rare-earth-discovery',
+    formula:      'Ln',
+    name:         'Rare Earth Mastery',
+    flavour:      'The lanthanides are hidden treasures — rare, expensive to mine, but their unique properties unlock new possibilities in synthesis.',
+    reagents:     [], // Special: fires automatically when first lanthanide unlocks
+    protonReward: 500,
+    permaBoost:   { type: 'category', category: 'lanthanide', factor: 1.5 },
+  },
 ];

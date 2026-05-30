@@ -38,6 +38,12 @@ function _defaultDrillCost(atomicNumber) {
   return Math.floor(20 * Math.pow(1.65, atomicNumber - 2));
 }
 
+function _rarityMultiplier(atomicNumber) {
+  // Lanthanides (57-71) are 8x rarer
+  if (atomicNumber >= 57 && atomicNumber <= 71) return 8;
+  return 1;
+}
+
 // ── Element Definitions ──────────────────────────────────
 // tableCol / tableRow are the visual grid positions (1-indexed).
 // Standard periodic table layout with lanthanide/actinide rows
@@ -188,6 +194,11 @@ ELEMENTS.forEach(el => {
   if (el.baseRate      === null) el.baseRate      = _defaultRate(el.atomicNumber);
   if (el.unlockCost    === null) el.unlockCost    = _defaultUnlockCost(el.atomicNumber);
   if (el.drillCostBase === null) el.drillCostBase = _defaultDrillCost(el.atomicNumber);
+
+  // Apply rarity multiplier (lanthanides 8x more expensive)
+  const rarity = _rarityMultiplier(el.atomicNumber);
+  el.unlockCost *= rarity;
+  el.drillCostBase *= rarity;
 });
 
 // Lookup map by atomic number for O(1) access
