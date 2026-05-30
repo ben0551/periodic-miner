@@ -53,6 +53,12 @@ const GameLoop = {
     UI.render();
     FeaturesUI.init();
 
+    // Wire up features panel toggle
+    document.getElementById('toggle-features').addEventListener('click', () => {
+      const panel = document.getElementById('panel-features');
+      panel.classList.toggle('features-hidden');
+    });
+
     // Auto-saves every 30s — manual save removed; Reset button handled in main.js
     document.getElementById('btn-prestige').addEventListener('click', () => this._handlePrestige());
     document.getElementById('modal-close').addEventListener('click', () => UI.closeModal());

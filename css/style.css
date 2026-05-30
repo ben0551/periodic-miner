@@ -210,6 +210,58 @@ aside h2, section h2 {
   flex-direction: column;
   background: var(--bg-panel);
   overflow: hidden;
+  transition: height 0.3s;
+}
+
+#panel-features.features-hidden {
+  height: 0;
+  border-top: none;
+  overflow: hidden;
+}
+
+#features-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#toggle-features {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+
+#toggle-features:hover {
+  color: var(--accent);
+}
+
+#panel-features.features-hidden #toggle-features {
+  transform: rotate(180deg);
+}
+
+/* On small screens, hide panel by default */
+@media (max-height: 900px) {
+  #panel-features {
+    height: 0;
+    border-top: none;
+  }
+
+  #panel-features.features-hidden {
+    height: 0;
+  }
+
+  #panel-features:not(.features-hidden) {
+    height: 250px;
+  }
+
+  #toggle-features {
+    display: block;
+  }
 }
 
 #feature-tabs {
