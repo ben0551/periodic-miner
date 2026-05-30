@@ -556,4 +556,39 @@ const UI = {
   _splashTimer:        null,
   _splashAutoTimer:    null,
   _splashDismissCleanup: null,
+
+  // ── Toast notification (brief, simple feedback) ──────────
+  showToast(message) {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toast';
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        z-index: 1000;
+        max-width: 300px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    toast.style.display = 'block';
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.style.display = 'none', 300);
+    }, 3000);
+  },
+
+  _toastTimer: null,
 };
