@@ -193,7 +193,11 @@ const UI = {
     list.querySelectorAll('.btn-buy-drill').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const n = parseInt(e.currentTarget.dataset.atomic, 10);
-        if (ResourceEngine.buyDrill(n)) this._queueChainRender();
+        if (ResourceEngine.buyDrill(n)) {
+          // Only update the specific element that got a drill, not all
+          TableUI._updateElementCell(n);
+          this._queueChainRender();
+        }
       });
     });
   },

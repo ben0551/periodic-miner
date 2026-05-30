@@ -127,33 +127,39 @@ const TableUI = {
   // ── Light update — called every UI frame ──────────────
   updateProduction() {
     ELEMENTS.forEach(el => {
-      const cell = this._cells[el.atomicNumber];
-      if (!cell) return;
-
-      const s = ResourceEngine.state[el.atomicNumber];
-      if (!s) return;
-
-      // Update lock state
-      cell.classList.toggle('locked',    !s.unlocked);
-      cell.classList.toggle('unlocked',   s.unlocked);
-      cell.classList.toggle('producing',  s.unlocked && s.drills > 0);
-
-      // Production bar: for locked elements, shows progress toward unlock cost.
-      // For unlocked elements, shows drills as a fraction of some visual max.
-      const bar = cell.querySelector('.prod-bar');
-      if (bar) {
-        if (!s.unlocked) {
-          // Show how close we are to unlocking
-          if (el.atomicNumber > 1) {
-            const prev = ResourceEngine.state[el.atomicNumber - 1];
-            const pct  = prev ? Math.min(100, (prev.amount / el.unlockCost) * 100) : 0;
-            bar.style.width = pct + '%';
-          }
-        } else {
-          // Show drills as a soft indicator (caps at 20 drills = 100%)
-          bar.style.width = Math.min(100, (s.drills / 20) * 100) + '%';
-        }
-      }
+      this._updateElementCell(el.atomicNumber);
     });
+  },
+
+  // Update a single element's cell without triggering animation on all cells
+  _updateElementCell(atomicNumber) {
+    const el = ELEMENT_BY_NUMBER[atomicNumber];
+    const cell = this._cells[atomicNumber];
+    if (!cell || !el) return;
+
+    const s = ResourceEngine.state[atomicNumber];
+    if (!s) return;
+
+    // Update lock state
+    cell.classList.toggle('locked',    !s.unlocked);
+    cell.classList.toggle('unlocked',   s.unlocked);
+    cell.classList.toggle('producing',  s.unlocked && s.drills > 0);
+
+    // Production bar: for locked elements, shows progress toward unlock cost.
+    // For unlocked elements, shows drills as a fraction of some visual max.
+    const bar = cell.querySelector('.prod-bar');
+    if (bar) {
+      if (!s.unlocked) {
+        // Show how close we are to unlocking
+        if (atomicNumber > 1) {
+          const prev = ResourceEngine.state[atomicNumber - 1];
+          const pct  = prev ? Math.min(100, (prev.amount / el.unlockCost) * 100) : 0;
+          bar.style.width = pct + '%';
+        }
+      } else {
+        // Show drills as a soft indicator (caps at 20 drills = 100%)
+        bar.style.width = Math.min(100, (s.drills / 20) * 100) + '%';
+      }
+    }
   },
 };
