@@ -203,9 +203,13 @@ const GameLoop = {
     const cost = 750000;
     const canAfford = UpgradeEngine.protons >= cost;
     btnProton.disabled = !canAfford;
-    btnProton.textContent = canAfford
-      ? `⚡ Prestige`
-      : `⚡ Need more`;
+    if (canAfford) {
+      btnProton.textContent = `⚡ Prestige`;
+    } else {
+      const needed = cost - UpgradeEngine.protons;
+      const formatted = UI.formatNum(needed);
+      btnProton.textContent = `⚡ Need ${formatted}`;
+    }
   },
 
   // ── Save / Load ───────────────────────────────────────
