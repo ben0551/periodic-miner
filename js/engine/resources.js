@@ -75,8 +75,44 @@ const ResourceEngine = {
       }
     });
 
+    // Radioactive decay: heavy elements transmute into lighter ones
+    this._applyRadioactiveDecay(deltaSeconds);
+
     this._checkUnlocks();
     ReactionEngine.tick(deltaSeconds);
+  },
+
+  _applyRadioactiveDecay(deltaSeconds) {
+    // Decay chains: heavy elements slowly transmute into lighter ones
+    const decayChains = {
+      84: { target: 82, rate: 0.0001 }, // Po → Pb
+      85: { target: 83, rate: 0.00008 }, // At → Bi
+      86: { target: 84, rate: 0.00006 }, // Rn → Po
+      87: { target: 85, rate: 0.00005 }, // Fr → At
+      88: { target: 86, rate: 0.000045 }, // Ra → Rn
+      89: { target: 87, rate: 0.00004 }, // Ac → Fr
+      90: { target: 88, rate: 0.000035 }, // Th → Ra
+      91: { target: 89, rate: 0.00003 }, // Pa → Ac
+      92: { target: 90, rate: 0.000025 }, // U → Th
+      93: { target: 91, rate: 0.00002 }, // Np → Pa
+      94: { target: 92, rate: 0.000015 }, // Pu → U
+      95: { target: 93, rate: 0.00001 }, // Am → Np
+      96: { target: 94, rate: 0.000008 }, // Cm → Pu
+    };
+
+    for (const [atomicStr, decay] of Object.entries(decayChains)) {
+      const atomic = parseInt(atomicStr, 10);
+      const s = this.state[atomic];
+      const target = this.state[decay.target];
+
+      if (s && s.unlocked && s.amount > 0) {
+        const decayed = s.amount * decay.rate * deltaSeconds;
+        s.amount -= decayed;
+        if (target && target.unlocked) {
+          target.amount += decayed;
+        }
+      }
+    }
   },
 
   // ── Check whether new elements should be auto-revealed ─
