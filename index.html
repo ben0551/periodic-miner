@@ -63,6 +63,14 @@
           <div id="info-fact"></div>
         </div>
       </div>
+      <div id="panel-features">
+        <div id="feature-tabs">
+          <button class="feat-btn active" data-feat="quiz">Quiz</button>
+          <button class="feat-btn" data-feat="shells">Shells</button>
+          <button class="feat-btn" data-feat="timeline">Timeline</button>
+        </div>
+        <div id="feature-content"></div>
+      </div>
     </section>
 
     <aside id="panel-upgrades">
@@ -123,6 +131,7 @@
   <!-- Load order: data → engine → ui → main -->
   <script src="js/data/elements.js"></script>
   <script src="js/data/element-facts.js"></script>
+  <script src="js/data/element-properties.js"></script>
   <script src="js/data/reactions.js"></script>
   <script src="js/engine/resources.js"></script>
   <script src="js/engine/upgrades.js"></script>
@@ -130,6 +139,7 @@
   <script src="js/engine/game.js"></script>
   <script src="js/ui/table.js"></script>
   <script src="js/ui/ui.js"></script>
+  <script src="js/ui/features.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

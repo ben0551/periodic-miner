@@ -358,6 +358,7 @@ const UI = {
         <div class="rx-reagents">${rows}</div>
         ${fired ? '<div class="rx-status">✓ Reacted</div>' : ''}
       `;
+      card.addEventListener('click', () => this._showReactionModal(rx));
       list.appendChild(card);
     });
   },
@@ -415,6 +416,32 @@ const UI = {
   },
 
   // ── Element Modal ─────────────────────────────────────
+  _showReactionModal(rx) {
+    const modal = document.getElementById('modal-element');
+    const content = document.getElementById('modal-content');
+
+    let html = `<h3>${rx.name}</h3>
+      <div style="margin:0.5rem 0;font-size:0.8rem">
+        <div style="font-family:var(--font-mono);font-size:1rem;margin-bottom:0.5rem;color:var(--accent)">${rx.formula}</div>
+        <div style="margin-bottom:0.5rem;color:var(--muted)">${rx.flavour}</div>
+        <div style="border-top:1px solid var(--border);padding-top:0.5rem">
+          <div><strong>Reagents:</strong></div>`;
+
+    rx.reagents.forEach(r => {
+      const el = ELEMENT_BY_NUMBER[r.atomicNumber];
+      html += `<div>· ${el.name} (${el.symbol}): ${r.amount}</div>`;
+    });
+
+    html += `<div style="margin-top:0.5rem"><strong>Reward:</strong> +${rx.protonReward} Protons`;
+    if (rx.permaBoost) {
+      html += ` · ${this._describeBoost(rx.permaBoost)} permanent`;
+    }
+    html += `</div></div></div>`;
+
+    content.innerHTML = html;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  },
+
   openElementModal(atomicNumber) {
     const el = ELEMENT_BY_NUMBER[atomicNumber];
     const s  = ResourceEngine.state[atomicNumber];
@@ -503,7 +530,7 @@ const UI = {
     if (!rx) return;
     document.getElementById('splash-symbol').textContent   = rx.formula;
     document.getElementById('splash-symbol').style.color   = 'var(--success)';
-    document.getElementById('splash-title').textContent    = `Reaction: ${rx.name}`;
+    document.getElementById('splash-title').innerHTML      = `<div style="font-size:0.6rem;color:var(--success);margin-bottom:0.2rem">NEW REACTION</div>${rx.name}`;
     document.getElementById('splash-subtitle').textContent =
       `+${rx.protonReward} Protons · ${rx.permaBoost ? this._describeBoost(rx.permaBoost) + ' permanent' : ''}`;
     document.getElementById('splash-fact').textContent     = rx.flavour;
