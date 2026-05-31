@@ -156,7 +156,8 @@ const FeaturesUI = {
             const periodMultiplier = Math.pow(1.5, ResourceEngine.maxUnlockedPeriod);
             const bonus = 10000 * periodMultiplier;
             UpgradeEngine.protons += bonus;
-            UI.showToast(`🎯 Streak ${this._quizState.streak}! +${UI.formatNum(Math.floor(bonus))} Protons`, 'success');
+            const celebration = ['🎉', '🌟', '✨', '⚡'].join('');
+            UI.showToast(`${celebration} STREAK ${this._quizState.streak}! ${celebration}\n+${UI.formatNum(Math.floor(bonus))} PROTONS`, 'success');
           }
           this._renderQuiz();
         } else {
@@ -222,7 +223,8 @@ const FeaturesUI = {
             const periodMultiplier = Math.pow(1.5, ResourceEngine.maxUnlockedPeriod);
             const bonus = 10000 * periodMultiplier;
             UpgradeEngine.protons += bonus;
-            UI.showToast(`🎯 Streak ${this._quizState.streak}! +${UI.formatNum(Math.floor(bonus))} Protons`, 'success');
+            const celebration = ['🎉', '🌟', '✨', '⚡'].join('');
+            UI.showToast(`${celebration} STREAK ${this._quizState.streak}! ${celebration}\n+${UI.formatNum(Math.floor(bonus))} PROTONS`, 'success');
           }
           this._renderQuiz();
         } else {

@@ -470,7 +470,7 @@ aside h2, section h2 {
 
 .quiz-options {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0.3rem;
 }
 
