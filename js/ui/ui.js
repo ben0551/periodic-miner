@@ -323,9 +323,11 @@ const UI = {
       card.dataset.upgradeId = upg.id;
 
       const progress = purchased ? 100 : this._calcUpgradeProgress(upg);
+      const reqsHtml = upg.requires?.length ? `<div class="upg-requires" style="font-size:0.75rem;color:var(--muted);margin:0.25rem 0">Requires: ${upg.requires.map(r => UpgradeEngine.UPGRADES.find(u => u.id === r)?.name ?? r).join(', ')}</div>` : '';
       card.innerHTML = `
         <div class="upg-title">${upg.name}</div>
         <div class="upg-desc">${upg.desc}</div>
+        ${reqsHtml}
         <div class="upg-cost">${purchased ? '✓ Purchased' : this._formatUpgradeCost(upg)}</div>
         ${!purchased ? `<div class="upg-progress"><div class="upg-progress-fill" style="width:${progress}%"></div></div>` : ''}
       `;
@@ -575,10 +577,13 @@ const UI = {
     let html = `${this.formatNum(upg.cost)} Protons`;
     if (upg.elementCost?.length) {
       const parts = upg.elementCost.map(ec => {
-        const sym = ELEMENT_BY_NUMBER[ec.atomicNumber]?.symbol ?? '?';
+        const el = ELEMENT_BY_NUMBER[ec.atomicNumber];
+        const sym = el?.symbol ?? '?';
+        const unlocked = ResourceEngine.state[ec.atomicNumber]?.unlocked;
         const have = ResourceEngine.state[ec.atomicNumber]?.amount ?? 0;
         const met  = have >= ec.amount;
-        return `<span style="color:${met ? 'var(--success)' : 'var(--danger)'}">${this.formatNum(ec.amount)} ${sym}</span>`;
+        const label = !unlocked ? `${sym} (locked)` : sym;
+        return `<span style="color:${met && unlocked ? 'var(--success)' : 'var(--danger)'}">${this.formatNum(ec.amount)} ${label}</span>`;
       }).join(' · ');
       html += `<span class="upg-element-cost">${parts}</span>`;
     }
