@@ -186,13 +186,22 @@ body.theme-light {
 
 /* Light theme element cell styling — minimal background, clean borders */
 body.theme-light .element-cell.unlocked {
-  background: transparent;
-  border-color: rgba(0, 102, 204, 0.2);
+  background: transparent !important;
+  border-color: rgba(0, 102, 204, 0.2) !important;
 }
 
 body.theme-light .element-cell.unlocked:hover {
-  background: rgba(0, 102, 204, 0.05);
-  border-color: var(--accent);
+  background: rgba(0, 102, 204, 0.05) !important;
+  border-color: var(--accent) !important;
+}
+
+body.theme-light .element-cell .el-name {
+  text-shadow: none !important;
+}
+
+body.theme-light .element-cell .symbol,
+body.theme-light .element-cell .atomic-num {
+  color: var(--text) !important;
 }
 
 /* ── Light Warm theme (light with warm tones) ── */
@@ -218,13 +227,22 @@ body.theme-light-warm {
 }
 
 body.theme-light-warm .element-cell.unlocked {
-  background: transparent;
-  border-color: rgba(204, 102, 0, 0.2);
+  background: transparent !important;
+  border-color: rgba(204, 102, 0, 0.2) !important;
 }
 
 body.theme-light-warm .element-cell.unlocked:hover {
-  background: rgba(204, 102, 0, 0.05);
-  border-color: var(--accent);
+  background: rgba(204, 102, 0, 0.05) !important;
+  border-color: var(--accent) !important;
+}
+
+body.theme-light-warm .element-cell .el-name {
+  text-shadow: none !important;
+}
+
+body.theme-light-warm .element-cell .symbol,
+body.theme-light-warm .element-cell .atomic-num {
+  color: var(--text) !important;
 }
 
 /* ── Light Cool theme (light with cool tones) ── */
@@ -250,13 +268,22 @@ body.theme-light-cool {
 }
 
 body.theme-light-cool .element-cell.unlocked {
-  background: transparent;
-  border-color: rgba(0, 102, 204, 0.2);
+  background: transparent !important;
+  border-color: rgba(0, 102, 204, 0.2) !important;
 }
 
 body.theme-light-cool .element-cell.unlocked:hover {
-  background: rgba(0, 102, 204, 0.05);
-  border-color: var(--accent);
+  background: rgba(0, 102, 204, 0.05) !important;
+  border-color: var(--accent) !important;
+}
+
+body.theme-light-cool .element-cell .el-name {
+  text-shadow: none !important;
+}
+
+body.theme-light-cool .element-cell .symbol,
+body.theme-light-cool .element-cell .atomic-num {
+  color: var(--text) !important;
 }
 
 html, body {
