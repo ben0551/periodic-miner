@@ -150,6 +150,13 @@ const FeaturesUI = {
             this._quizState.maxStreak = this._quizState.streak;
             UpgradeEngine.protons += 5;
           }
+          // Award milestone bonus at every 10-streak
+          if (this._quizState.streak % 10 === 0) {
+            const periodMultiplier = Math.pow(1.5, ResourceEngine.maxUnlockedPeriod);
+            const bonus = 10000 * periodMultiplier;
+            UpgradeEngine.protons += bonus;
+            UI.showToast(`🎯 Streak ${this._quizState.streak}! +${UI.formatNum(Math.floor(bonus))} Protons`, 'success');
+          }
           this._renderQuiz();
         } else {
           this._quizState.streak = 0;
@@ -207,6 +214,13 @@ const FeaturesUI = {
           if (this._quizState.streak > this._quizState.maxStreak) {
             this._quizState.maxStreak = this._quizState.streak;
             UpgradeEngine.protons += 5;
+          }
+          // Award milestone bonus at every 10-streak
+          if (this._quizState.streak % 10 === 0) {
+            const periodMultiplier = Math.pow(1.5, ResourceEngine.maxUnlockedPeriod);
+            const bonus = 10000 * periodMultiplier;
+            UpgradeEngine.protons += bonus;
+            UI.showToast(`🎯 Streak ${this._quizState.streak}! +${UI.formatNum(Math.floor(bonus))} Protons`, 'success');
           }
           this._renderQuiz();
         } else {
