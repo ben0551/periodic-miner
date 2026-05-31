@@ -10,9 +10,22 @@
   <header id="game-header">
     <h1>Periodic Miner</h1>
     <div id="header-stats">
-      <span id="stat-protons">Protons: 0</span>
-      <span id="stat-rank">Period: 1</span>
-      <span id="stat-total-elements">Elements: 1</span>
+      <div class="stat-group">
+        <div class="stat-label">Protons:</div>
+        <div class="stat-value" id="stat-protons">0</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label">Period:</div>
+        <div class="stat-value" id="stat-rank">1</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label">Unlocked:</div>
+        <div class="stat-value" id="stat-total-elements">1/118</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label">Multiplier:</div>
+        <div class="stat-value" id="stat-multiplier">×1.0</div>
+      </div>
     </div>
     <div id="header-actions">
       <button id="btn-proton-prestige" class="btn-prestige-proton" disabled title="Reset current period for multiplier boost">⚡ Prestige</button>

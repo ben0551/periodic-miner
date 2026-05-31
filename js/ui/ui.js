@@ -421,19 +421,29 @@ const UI = {
 
   _updateHeader() {
     document.getElementById('stat-protons').textContent =
-      `Protons: ${this.formatNum(UpgradeEngine.protons)}`;
+      this.formatNum(UpgradeEngine.protons);
 
     const unlocked = ELEMENTS_SORTED.filter(
       el => ResourceEngine.state[el.atomicNumber]?.unlocked
     ).length;
     document.getElementById('stat-total-elements').textContent =
-      `Elements Unlocked: ${unlocked} / ${ELEMENTS.length}`;
+      `${unlocked}/${ELEMENTS.length}`;
 
     // Current period = highest period with any unlocked element
     const maxPeriod = ELEMENTS_SORTED
       .filter(el => ResourceEngine.state[el.atomicNumber]?.unlocked)
       .reduce((max, el) => Math.max(max, el.period), 1);
-    document.getElementById('stat-rank').textContent = `Period: ${maxPeriod}`;
+    document.getElementById('stat-rank').textContent = maxPeriod;
+
+    // Update multiplier display (prestige + group bonuses + reaction boosts for all elements)
+    let totalMultiplier = UpgradeEngine.prestigeMultiplier;
+    // Add reaction boosts that apply to all elements
+    for (const boost of ReactionEngine._permaBoosts) {
+      if (boost.type === 'all') totalMultiplier *= boost.factor;
+    }
+    // Add group bonuses
+    totalMultiplier *= ResourceEngine.getGroupBonus();
+    document.getElementById('stat-multiplier').textContent = `×${totalMultiplier.toFixed(2)}`;
   },
 
   // ── Element Modal ─────────────────────────────────────

@@ -210,15 +210,33 @@ html, body {
 }
 
 #header-stats {
-  display: flex;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
   flex: 1;
-  font-size: 0.85rem;
-  color: var(--muted);
 }
 
-#header-stats span { color: var(--text); }
+.stat-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
 #stat-protons { color: var(--gold); }
+#stat-multiplier { color: var(--accent); }
 
 #header-actions { display: flex; gap: 0.5rem; }
 
