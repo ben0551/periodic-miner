@@ -465,15 +465,9 @@ const UI = {
       .reduce((max, el) => Math.max(max, el.period), 1);
     document.getElementById('stat-rank').textContent = maxPeriod;
 
-    // Update multiplier display (prestige + group bonuses + reaction boosts for all elements)
-    let totalMultiplier = UpgradeEngine.prestigeMultiplier;
-    // Add reaction boosts that apply to all elements
-    for (const boost of ReactionEngine._permaBoosts) {
-      if (boost.type === 'all') totalMultiplier *= boost.factor;
-    }
-    // Add group bonuses
-    totalMultiplier *= ResourceEngine.getGroupBonus();
-    document.getElementById('stat-multiplier').textContent = `×${totalMultiplier.toFixed(2)}`;
+    // Update multiplier display — show total multiplier for Hydrogen as a representative element
+    const hydrogenMultiplier = UpgradeEngine.productionMultiplier(1);
+    document.getElementById('stat-multiplier').textContent = `×${hydrogenMultiplier.toFixed(2)}`;
   },
 
   // ── Element Modal ─────────────────────────────────────
