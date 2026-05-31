@@ -59,6 +59,17 @@ const GameLoop = {
       panel.classList.toggle('features-hidden');
     });
 
+    // Wire up table collapse toggle
+    const savedTableState = localStorage.getItem('periodic-miner-table-collapsed') === 'true';
+    if (savedTableState) {
+      document.getElementById('panel-table').classList.add('table-collapsed');
+    }
+    document.getElementById('toggle-table').addEventListener('click', () => {
+      const table = document.getElementById('panel-table');
+      table.classList.toggle('table-collapsed');
+      localStorage.setItem('periodic-miner-table-collapsed', table.classList.contains('table-collapsed'));
+    });
+
     // Auto-saves every 30s — manual save removed; Reset button handled in main.js
     document.getElementById('btn-prestige').addEventListener('click', () => this._handlePrestige());
     document.getElementById('btn-proton-prestige').addEventListener('click', () => this._handleProtonPrestige());

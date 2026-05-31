@@ -401,6 +401,24 @@ aside h2, section h2 {
 
 #panel-table > h2 { flex-shrink: 0; }
 
+/* Table collapse state */
+#panel-table.table-collapsed {
+  flex: 0;
+}
+
+#panel-table.table-collapsed #periodic-table,
+#panel-table.table-collapsed #element-info-strip {
+  display: none;
+}
+
+#toggle-table {
+  transition: transform 0.3s;
+}
+
+#panel-table.table-collapsed #toggle-table {
+  transform: rotate(-90deg);
+}
+
 /* ── Periodic Table Grid ────────────────────────────────── */
 #periodic-table {
   display: grid;
@@ -462,7 +480,7 @@ aside h2, section h2 {
   display: flex;
   flex-direction: column;
   background: var(--bg-panel);
-  overflow: visible;
+  overflow: hidden;
   transition: height 0.3s;
 }
 

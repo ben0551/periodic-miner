@@ -82,7 +82,10 @@
     </aside>
 
     <section id="panel-table">
-      <h2>The Table</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0 0.5rem">
+        <h2>The Table</h2>
+        <button id="toggle-table" title="Toggle periodic table" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.9rem;padding:0.25rem 0.5rem">▼</button>
+      </div>
       <div id="periodic-table"></div>
       <!-- Hover/click info strip — shows element name + random fact -->
       <div id="element-info-strip" class="empty">
