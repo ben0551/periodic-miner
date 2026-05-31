@@ -2,6 +2,8 @@
 // PERIODIC MINER — Entry Point
 // ============================================================
 
+const VERSION = '7e877ce';
+
 document.addEventListener('DOMContentLoaded', () => {
   const THEMES = ['dark', 'torch', 'neon', 'ocean', 'forest', 'solar', 'contrast', 'light', 'light-warm', 'light-cool'];
   const savedTheme = localStorage.getItem('periodic-miner-theme') ?? 'dark';
@@ -34,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
   GameLoop.init();
   FeaturesUI.init();
   GameLoop.start();
+
+  document.getElementById('version').textContent = `v${VERSION}`;
 
   // Debug helpers (localhost / file://)
   if (location.hostname === 'localhost' || location.protocol === 'file:') {
