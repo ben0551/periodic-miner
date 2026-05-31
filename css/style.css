@@ -443,7 +443,7 @@ aside h2, section h2 {
   padding: 0.5rem;
   background: var(--bg-card);
   border-radius: 4px;
-  min-height: 100px;
+  min-height: 65px;
   display: flex;
   flex-direction: column;
   justify-content: center;
