@@ -3,7 +3,7 @@
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  const THEMES = ['dark', 'torch', 'neon', 'ocean', 'forest', 'solar', 'contrast'];
+  const THEMES = ['dark', 'torch', 'neon', 'ocean', 'forest', 'solar', 'contrast', 'light', 'light-warm', 'light-cool'];
   const savedTheme = localStorage.getItem('periodic-miner-theme') ?? 'dark';
 
   // Apply saved theme before game init to prevent flash

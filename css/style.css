@@ -162,6 +162,103 @@ body.theme-contrast {
     #000000;
 }
 
+/* ── Light theme (bright and readable) ── */
+body.theme-light {
+  --bg-deep:    #ffffff;
+  --bg-panel:   #f5f5f5;
+  --bg-card:    #e8e8e8;
+  --accent:     #0066cc;
+  --accent-dim: #0052a3;
+  --gold:       #ff9500;
+  --danger:     #cc0000;
+  --success:    #00aa00;
+  --text:       #1a1a1a;
+  --muted:      #666666;
+  --border:     #cccccc;
+  --glow:       0 0 8px rgba(0,102,204,0.3);
+  --cave-rock:  #d0d0d0;
+  background:
+    linear-gradient(180deg, #ffffff 0%, transparent 12%),
+    linear-gradient(0deg,   #ffffff 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(200,220,255,0.2) 0%, transparent 55%),
+    #ffffff;
+}
+
+/* Light theme element cell styling — minimal background, clean borders */
+body.theme-light .element-cell.unlocked {
+  background: transparent;
+  border-color: rgba(0, 102, 204, 0.2);
+}
+
+body.theme-light .element-cell.unlocked:hover {
+  background: rgba(0, 102, 204, 0.05);
+  border-color: var(--accent);
+}
+
+/* ── Light Warm theme (light with warm tones) ── */
+body.theme-light-warm {
+  --bg-deep:    #fffbf5;
+  --bg-panel:   #f7f3ed;
+  --bg-card:    #ede7e0;
+  --accent:     #cc6600;
+  --accent-dim: #994400;
+  --gold:       #ff9500;
+  --danger:     #cc0000;
+  --success:    #00aa00;
+  --text:       #2a1a0a;
+  --muted:      #7a6a5a;
+  --border:     #d4c4b4;
+  --glow:       0 0 8px rgba(204,102,0,0.3);
+  --cave-rock:  #d9c9b9;
+  background:
+    linear-gradient(180deg, #fffbf5 0%, transparent 12%),
+    linear-gradient(0deg,   #fffbf5 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(255,220,180,0.2) 0%, transparent 55%),
+    #fffbf5;
+}
+
+body.theme-light-warm .element-cell.unlocked {
+  background: transparent;
+  border-color: rgba(204, 102, 0, 0.2);
+}
+
+body.theme-light-warm .element-cell.unlocked:hover {
+  background: rgba(204, 102, 0, 0.05);
+  border-color: var(--accent);
+}
+
+/* ── Light Cool theme (light with cool tones) ── */
+body.theme-light-cool {
+  --bg-deep:    #f5f9ff;
+  --bg-panel:   #eef5ff;
+  --bg-card:    #e5f0ff;
+  --accent:     #0066cc;
+  --accent-dim: #0052a3;
+  --gold:       #0099ff;
+  --danger:     #cc0000;
+  --success:    #00aa00;
+  --text:       #001a4d;
+  --muted:      #4d6680;
+  --border:     #b3ccff;
+  --glow:       0 0 8px rgba(0,102,204,0.3);
+  --cave-rock:  #c4d9ff;
+  background:
+    linear-gradient(180deg, #f5f9ff 0%, transparent 12%),
+    linear-gradient(0deg,   #f5f9ff 0%, transparent 8%),
+    radial-gradient(ellipse 200% 80% at 50% 110%, rgba(180,220,255,0.2) 0%, transparent 55%),
+    #f5f9ff;
+}
+
+body.theme-light-cool .element-cell.unlocked {
+  background: transparent;
+  border-color: rgba(0, 102, 204, 0.2);
+}
+
+body.theme-light-cool .element-cell.unlocked:hover {
+  background: rgba(0, 102, 204, 0.05);
+  border-color: var(--accent);
+}
+
 html, body {
   height: 100%;
   color: var(--text);
