@@ -120,9 +120,11 @@ const GameLoop = {
 
     const bonus  = 1.0 + period * 0.5;
     const next   = period + 1;
+    const current = UpgradeEngine.prestigeMultiplier.toFixed(2);
+    const after = (UpgradeEngine.prestigeMultiplier * bonus).toFixed(2);
     const confirmed = confirm(
       `Nobel Prize Reset — Period ${period}\n\n` +
-      `Reset all Period ${period} elements and receive a permanent ×${bonus.toFixed(1)} production multiplier?\n\n` +
+      `Reset all Period ${period} elements and receive a permanent ×${bonus.toFixed(1)} production multiplier (currently ×${current}, after ×${after})?\n\n` +
       `This unlocks Period ${next}. Your Protons and purchased upgrades are kept.\n\n` +
       `Earlier periods keep running — you only lose Period ${period} stockpiles.`
     );
@@ -151,11 +153,13 @@ const GameLoop = {
 
     const period = ResourceEngine.maxUnlockedPeriod;
     const bonus = 1.3; // ×1.3 multiplier
+    const current = UpgradeEngine.prestigeMultiplier.toFixed(2);
+    const after = (UpgradeEngine.prestigeMultiplier * bonus).toFixed(2);
 
     const confirmed = confirm(
       `Proton Prestige — Period ${period}\n\n` +
       `Cost: ${cost.toLocaleString()} Protons\n\n` +
-      `Reset all Period ${period} elements and receive a permanent ×${bonus} production multiplier?\n\n` +
+      `Reset all Period ${period} elements and receive a permanent ×${bonus} production multiplier (currently ×${current}, after ×${after})?\n\n` +
       `Your Protons and purchased upgrades are kept.\n\n` +
       `Earlier periods keep running — you only lose Period ${period} stockpiles.`
     );
