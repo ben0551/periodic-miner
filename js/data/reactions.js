@@ -21,7 +21,7 @@ const REACTIONS = [
     name:         'Water',
     flavour:      'Two hydrogens, one oxygen — the molecule that makes life possible on Earth.',
     reagents:     [{ atomicNumber: 1, amount: 500 }, { atomicNumber: 8, amount: 250 }],
-    protonReward: 150,
+    protonReward: 225,
     permaBoost:   { type: 'element', atomicNumber: 1, factor: 1.25 },
   },
   {
@@ -30,7 +30,7 @@ const REACTIONS = [
     name:         'Ammonia',
     flavour:      'The Haber-Bosch process made ammonia at scale — and now feeds roughly half the world\'s population.',
     reagents:     [{ atomicNumber: 7, amount: 300 }, { atomicNumber: 1, amount: 900 }],
-    protonReward: 200,
+    protonReward: 300,
     permaBoost:   { type: 'element', atomicNumber: 7, factor: 1.3 },
   },
   {
@@ -39,7 +39,7 @@ const REACTIONS = [
     name:         'Methane',
     flavour:      'The simplest hydrocarbon. Natural gas is mostly methane, formed over millions of years from ancient organisms.',
     reagents:     [{ atomicNumber: 6, amount: 200 }, { atomicNumber: 1, amount: 800 }],
-    protonReward: 175,
+    protonReward: 262,
     permaBoost:   { type: 'element', atomicNumber: 6, factor: 1.25 },
   },
   {
@@ -57,7 +57,7 @@ const REACTIONS = [
     name:         'Hydrogen Chloride (gas)',
     flavour:      'A colorless, pungent gas. Dissolves in water to form hydrochloric acid, one of the strongest common acids.',
     reagents:     [{ atomicNumber: 1, amount: 400 }, { atomicNumber: 9, amount: 300 }],
-    protonReward: 180,
+    protonReward: 270,
     permaBoost:   null,
   },
   {
@@ -75,7 +75,7 @@ const REACTIONS = [
     name:         'Hydrogen Sulfide',
     flavour:      'Smells like rotten eggs. Toxic in high concentrations, but found naturally in volcanoes and geothermal vents.',
     reagents:     [{ atomicNumber: 1, amount: 500 }, { atomicNumber: 16, amount: 250 }],
-    protonReward: 200,
+    protonReward: 300,
     permaBoost:   null,
   },
   {
@@ -113,7 +113,7 @@ const REACTIONS = [
     name:         'Hydrogen Sulfide',
     flavour:      'The rotten-egg smell of volcanic vents. Some deep-sea ecosystems run entirely on hydrogen sulfide rather than sunlight.',
     reagents:     [{ atomicNumber: 1, amount: 800 }, { atomicNumber: 16, amount: 400 }],
-    protonReward: 180,
+    protonReward: 270,
     permaBoost:   { type: 'element', atomicNumber: 16, factor: 1.25 },
   },
 
@@ -220,7 +220,7 @@ const REACTIONS = [
     name:         'Sodium Oxide',
     flavour:      'When sodium burns in oxygen, it forms a yellowish powder. Reacts vigorously with water to form sodium hydroxide.',
     reagents:     [{ atomicNumber: 11, amount: 300 }, { atomicNumber: 8, amount: 150 }],
-    protonReward: 200,
+    protonReward: 300,
     permaBoost:   { type: 'element', atomicNumber: 11, factor: 1.15 },
   },
   {
@@ -286,7 +286,7 @@ const REACTIONS = [
     name:         'Calcium Oxide (Quicklime)',
     flavour:      'An ancient material. When calcium reacts with oxygen, it releases so much heat it was once used to produce light before electricity existed.',
     reagents:     [{ atomicNumber: 20, amount: 250 }, { atomicNumber: 8, amount: 180 }],
-    protonReward: 180,
+    protonReward: 270,
     permaBoost:   null,
   },
   {
@@ -315,7 +315,7 @@ const REACTIONS = [
     name:         'Ozone',
     flavour:      'Oxygen\'s reactive cousin. Forms naturally in the upper atmosphere and protects Earth from UV radiation.',
     reagents:     [{ atomicNumber: 8, amount: 400 }],
-    protonReward: 180,
+    protonReward: 270,
     permaBoost:   { type: 'element', atomicNumber: 8, factor: 1.3 },
   },
   {
