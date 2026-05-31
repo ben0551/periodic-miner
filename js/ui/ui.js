@@ -85,7 +85,7 @@ const UI = {
 
     // Update tab button text
     const tabs = {
-      available: `Available (${availableCount})`,
+      available: `Upgrades (${availableCount})`,
       reactions: `Reactions (${readyCount})`,
       purchased: `Purchased (${purchasedCount})`
     };
