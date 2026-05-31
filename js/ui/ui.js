@@ -72,17 +72,21 @@ const UI = {
   },
 
   _updateTabCounts() {
-    // Count available upgrades
-    const availableCount = UpgradeEngine.available().length;
-    // Count unfired reactions
-    const unfiredCount = REACTIONS.filter(rx => !ReactionEngine._fired.has(rx.id)).length;
+    // Count affordable upgrades (unpurchased and can afford)
+    const availableCount = UpgradeEngine.UPGRADES.filter(u =>
+      !UpgradeEngine.isPurchased(u.id) && UpgradeEngine.canAfford(u.id)
+    ).length;
+    // Count ready reactions (unfired and all reagents met)
+    const readyCount = REACTIONS.filter(rx =>
+      !ReactionEngine._fired.has(rx.id) && ReactionEngine._canFire(rx)
+    ).length;
     // Count purchased upgrades
     const purchasedCount = UpgradeEngine.UPGRADES.filter(u => UpgradeEngine.isPurchased(u.id)).length;
 
     // Update tab button text
     const tabs = {
       available: `Available (${availableCount})`,
-      reactions: `Reactions (${unfiredCount})`,
+      reactions: `Reactions (${readyCount})`,
       purchased: `Purchased (${purchasedCount})`
     };
 
