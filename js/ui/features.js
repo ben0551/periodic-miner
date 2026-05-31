@@ -109,11 +109,12 @@ const FeaturesUI = {
     const el = ELEMENT_BY_NUMBER[this._quizState.current];
     const isSymbolMode = Math.random() > 0.5;
 
-    // Generate wrong answers
+    // Generate wrong answers (increases with streak: +1 for every 10-streak, max 5 wrong)
+    const numWrongAnswers = Math.min(5, 2 + Math.floor(this._quizState.streak / 10));
     const otherNumbers = unlockedNumbers.filter(n => n !== this._quizState.current);
     const wrongAnswers = otherNumbers
       .sort(() => Math.random() - 0.5)
-      .slice(0, 2)
+      .slice(0, numWrongAnswers)
       .map(n => ELEMENT_BY_NUMBER[n]);
 
     const correctAnswer = isSymbolMode ? el.name : el.symbol;
@@ -175,11 +176,12 @@ const FeaturesUI = {
     const rx = firedReactions[Math.floor(Math.random() * firedReactions.length)];
     this._quizState.current = rx.id;
 
-    // Generate wrong answers: other reaction names
+    // Generate wrong answers (increases with streak: +1 for every 10-streak, max 5 wrong)
+    const numWrongAnswers = Math.min(5, 2 + Math.floor(this._quizState.streak / 10));
     const otherReactions = firedReactions.filter(r => r.id !== rx.id);
     const wrongAnswers = otherReactions
       .sort(() => Math.random() - 0.5)
-      .slice(0, 2)
+      .slice(0, numWrongAnswers)
       .map(r => r.name);
 
     const options = [rx.name, ...wrongAnswers]
