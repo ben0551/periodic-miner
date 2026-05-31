@@ -372,12 +372,13 @@ const UI = {
     const list = document.getElementById('upgrade-list');
     list.innerHTML = '';
 
-    // Separate unfired from fired reactions
-    const unfired = REACTIONS.filter(rx => !ReactionEngine._fired.has(rx.id));
+    // Separate reactions by priority: ready → unfired → fired
+    const ready = REACTIONS.filter(rx => !ReactionEngine._fired.has(rx.id) && ReactionEngine._canFire(rx));
+    const unfiredNotReady = REACTIONS.filter(rx => !ReactionEngine._fired.has(rx.id) && !ReactionEngine._canFire(rx));
     const fired = REACTIONS.filter(rx => ReactionEngine._fired.has(rx.id));
 
-    // Render unfired first, then fired
-    [...unfired, ...fired].forEach(rx => {
+    // Render ready first, then unfired (not ready), then fired
+    [...ready, ...unfiredNotReady, ...fired].forEach(rx => {
       const isFired   = ReactionEngine._fired.has(rx.id);
       const canFire = !isFired && ReactionEngine._canFire(rx);
       const card    = document.createElement('div');
