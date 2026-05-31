@@ -1,6 +1,6 @@
 # Periodic Miner
 
-An idle/incremental game inspired by AdVenture Communist, themed around mining the periodic table of elements.
+An idle/incremental game inspired by Zac's love of science, themed around mining the periodic table of elements.
 
 **Play:** https://ben0551.github.io/periodic-miner/
 
