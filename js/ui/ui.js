@@ -60,6 +60,7 @@ const UI = {
 
   // Wire tab buttons once per render (not inside _renderUpgrades to avoid accumulation)
   _setupTabButtons() {
+    this._updateTabCounts();
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.onclick = (e) => {
         this._activeTab = e.currentTarget.dataset.tab;
@@ -67,6 +68,29 @@ const UI = {
         e.currentTarget.classList.add('active');
         this._renderUpgrades();
       };
+    });
+  },
+
+  _updateTabCounts() {
+    // Count available upgrades
+    const availableCount = UpgradeEngine.available().length;
+    // Count unfired reactions
+    const unfiredCount = REACTIONS.filter(rx => !ReactionEngine._fired.has(rx.id)).length;
+    // Count purchased upgrades
+    const purchasedCount = UpgradeEngine.UPGRADES.filter(u => UpgradeEngine.isPurchased(u.id)).length;
+
+    // Update tab button text
+    const tabs = {
+      available: `Available (${availableCount})`,
+      reactions: `Reactions (${unfiredCount})`,
+      purchased: `Purchased (${purchasedCount})`
+    };
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      const tabName = btn.dataset.tab;
+      if (tabs[tabName]) {
+        btn.textContent = tabs[tabName];
+      }
     });
   },
 
@@ -252,6 +276,7 @@ const UI = {
 
   // ── Upgrades Panel ────────────────────────────────────
   _renderUpgrades() {
+    this._updateTabCounts();
     if (this._activeTab === 'reactions') { this._renderReactions(); return; }
 
     const list = document.getElementById('upgrade-list');

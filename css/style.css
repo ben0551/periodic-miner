@@ -294,6 +294,23 @@ html, body {
   overflow: hidden;
 }
 
+/* ── Support Link ────────────────────────────────────────── */
+#support-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  text-decoration: none;
+  transition: opacity 0.15s;
+  opacity: 0.7;
+}
+
+#support-link:hover {
+  opacity: 1;
+}
+
 /* ── Cave formations ─────────────────────────────────────── */
 .cave-rock { fill: var(--cave-rock); }
 
