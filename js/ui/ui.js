@@ -469,7 +469,10 @@ const UI = {
 
     // Update multiplier display — show total multiplier for Hydrogen as a representative element
     const hydrogenMultiplier = UpgradeEngine.productionMultiplier(1);
-    document.getElementById('stat-multiplier').textContent = `×${hydrogenMultiplier.toFixed(2)}`;
+    const formatted = hydrogenMultiplier >= 1e6
+      ? hydrogenMultiplier.toExponential(2)
+      : hydrogenMultiplier.toFixed(2);
+    document.getElementById('stat-multiplier').textContent = `×${formatted}`;
   },
 
   // ── Element Modal ─────────────────────────────────────
