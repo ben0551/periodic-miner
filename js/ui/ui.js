@@ -440,6 +440,8 @@ const UI = {
   _showReactionModal(rx) {
     const modal = document.getElementById('modal-element');
     const content = document.getElementById('modal-content');
+    const isFired = ReactionEngine._fired.has(rx.id);
+    const canFire = !isFired && ReactionEngine._canFire(rx);
 
     let html = `<h3>${rx.name}</h3>
       <div style="margin:0.5rem 0;font-size:0.8rem">
@@ -450,17 +452,41 @@ const UI = {
 
     rx.reagents.forEach(r => {
       const el = ELEMENT_BY_NUMBER[r.atomicNumber];
-      html += `<div>· ${el.name} (${el.symbol}): ${r.amount}</div>`;
+      const have = ResourceEngine.state[r.atomicNumber]?.amount ?? 0;
+      const met = have >= r.amount;
+      const pct = Math.min(100, (have / r.amount) * 100);
+      html += `<div style="display:flex;justify-content:space-between;gap:0.5rem">
+        <div>· ${el.name} (${el.symbol})</div>
+        <div style="color:${met ? 'var(--success)' : 'var(--muted)'}">${this.formatNum(Math.floor(have))}/${this.formatNum(r.amount)}</div>
+      </div>`;
     });
 
     html += `<div style="margin-top:0.5rem"><strong>Reward:</strong> +${rx.protonReward} Protons`;
     if (rx.permaBoost) {
       html += ` · ${this._describeBoost(rx.permaBoost)} permanent`;
     }
-    html += `</div></div></div>`;
+    html += `</div></div>`;
+
+    if (!isFired) {
+      const btnClass = canFire ? 'btn-primary' : 'btn-disabled';
+      const btnText = canFire ? '⚡ Fire Reaction' : '✗ Not Ready';
+      html += `<button id="fire-reaction-btn" class="${btnClass}" style="margin-top:1rem;width:100%;padding:0.5rem;cursor:${canFire ? 'pointer' : 'not-allowed'}">${btnText}</button>`;
+    } else {
+      html += `<div style="margin-top:1rem;color:var(--success);text-align:center">✓ Reacted</div>`;
+    }
 
     content.innerHTML = html;
     document.getElementById('modal-overlay').classList.remove('hidden');
+
+    if (!isFired && canFire) {
+      document.getElementById('fire-reaction-btn').addEventListener('click', () => {
+        if (ReactionEngine.tryFire(rx.id)) {
+          UI.closeModal();
+          UI._renderUpgrades();
+          UI._updateHeader();
+        }
+      });
+    }
   },
 
   openElementModal(atomicNumber) {

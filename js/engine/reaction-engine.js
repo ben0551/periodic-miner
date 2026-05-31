@@ -23,18 +23,7 @@ const ReactionEngine = {
   },
 
   tick(deltaSeconds) {
-    this._checkTimer += deltaSeconds;
-    if (this._checkTimer < 1.0) return;
-    this._checkTimer = 0;
-    this._checkAll();
-  },
-
-  _checkAll() {
-    for (const rx of REACTIONS) {
-      if (this._fired.has(rx.id)) continue;
-      if (!this._canFire(rx)) continue;
-      this._fire(rx);
-    }
+    // Reactions now require manual firing via UI click
   },
 
   _canFire(rx) {
@@ -42,6 +31,15 @@ const ReactionEngine = {
       const s = ResourceEngine.state[r.atomicNumber];
       return s && s.unlocked && s.amount >= r.amount;
     });
+  },
+
+  // Attempt to manually fire a reaction (called by UI click)
+  tryFire(rxId) {
+    if (this._fired.has(rxId)) return false;
+    const rx = REACTIONS.find(r => r.id === rxId);
+    if (!rx || !this._canFire(rx)) return false;
+    this._fire(rx);
+    return true;
   },
 
   _fire(rx) {
