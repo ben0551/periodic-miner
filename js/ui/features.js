@@ -166,8 +166,10 @@ const FeaturesUI = {
           const message = isSymbolMode
             ? `The correct answer is ${el.name} — ${el.symbol} is the symbol for ${el.name}.`
             : `The correct answer is ${el.symbol} — the symbol for ${el.name}.`;
-          UI.showToast(message);
-          setTimeout(() => this._renderQuiz(), 800);
+          UI.showToast(message + '\n\n(Click to continue)');
+          // Disable all buttons and wait for click to continue
+          content.querySelectorAll('.quiz-btn').forEach(btn => btn.disabled = true);
+          content.addEventListener('click', () => this._renderQuiz(), { once: true });
         }
       });
     });
@@ -231,8 +233,10 @@ const FeaturesUI = {
           this._quizState.streak = 0;
           e.currentTarget.style.backgroundColor = 'var(--danger)';
           const message = `The correct answer is ${rx.name} — the formula is ${rx.formula}.`;
-          UI.showToast(message);
-          setTimeout(() => this._renderQuiz(), 800);
+          UI.showToast(message + '\n\n(Click to continue)');
+          // Disable all buttons and wait for click to continue
+          content.querySelectorAll('.quiz-btn').forEach(btn => btn.disabled = true);
+          content.addEventListener('click', () => this._renderQuiz(), { once: true });
         }
       });
     });
