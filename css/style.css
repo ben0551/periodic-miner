@@ -4,6 +4,9 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Disable double-tap zoom on iPad/tablets */
+body, button, select, input, a { touch-action: manipulation; }
+
 :root {
   --font-mono: 'Courier New', 'Consolas', monospace;
 }
